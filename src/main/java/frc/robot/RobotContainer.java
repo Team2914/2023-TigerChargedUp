@@ -18,7 +18,13 @@ public class RobotContainer {
   
   public RobotContainer() {
     sub_drivetrain = new Drivetrain();
-    con_driver = new XboxController(OIConstants.DRIVER_CONTROLLER_PORT);
+    con_driver = new XboxController(OIConstants.kDriverControllerPort);
+
+    sub_drivetrain.setDefaultCommand(new SwerveDrive(sub_drivetrain,
+                                                    () -> con_driver.getRawAxis(OIConstants.kLeftStickXAxis),
+                                                    () -> con_driver.getRawAxis(OIConstants.kLeftStickYAxis),
+                                                    () -> con_driver.getRawAxis(OIConstants.kRightStickXAxis),
+                                                    () -> con_driver.getAButton()));   
 
     configureBindings();
   }

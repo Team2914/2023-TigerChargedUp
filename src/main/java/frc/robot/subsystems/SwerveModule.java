@@ -12,7 +12,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
+/* Note for future programmers: everything is handled by these SwerveModule classes so don't worry about the 
+   math and sciences and stuff. Just copy and paste shit, they're all modular. 
+   BUT REMEMBER TO UPDATE THE CONFIGURATION FILE! (Constants.java) */
+
+// SwerveModule - the module
 public class SwerveModule {
+    // Hardware stuff 
     private CANSparkMax m_drive;
     private CANSparkMax m_rotation;
     private AbsoluteEncoder en_rotationEncoder;
