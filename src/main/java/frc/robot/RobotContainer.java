@@ -4,40 +4,45 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.SwerveDrive;
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.*;
 
 // The container for the robot. Contains subsystems, OI devices, and commands.
 public class RobotContainer {
   
   private final Drivetrain sub_drivetrain;
-  private final XboxController con_driver;
+  private final Vision sub_vision;
+  private final Joystick con_driver;
   
   public RobotContainer() {
     sub_drivetrain = new Drivetrain();
-    con_driver = new XboxController(OIConstants.kDriverControllerPort);
-
-    sub_drivetrain.setDefaultCommand(new SwerveDrive(sub_drivetrain,
-                                                    () -> con_driver.getRawAxis(OIConstants.kLeftStickXAxis),
-                                                    () -> con_driver.getRawAxis(OIConstants.kLeftStickYAxis),
-                                                    () -> con_driver.getRawAxis(OIConstants.kRightStickXAxis),
-                                                    () -> con_driver.getAButton()));   
-
+    sub_vision = new Vision();
+    con_driver = new Joystick(OIConstants.kDriverControllerPort); 
+                                                    
+    sub_drivetrain.setDefaultCommand(new SwerveDrive(sub_drivetrain, 
+                                                    () -> con_driver.getX(), 
+                                                    () -> con_driver.getY(), 
+                                                    () -> con_driver.getZ()));
+    
     configureBindings();
   }
 
   private void configureBindings() {
-    
+    /* Driver controller */
+    // Trigger toggles field relative driving
+    new JoystickButton(con_driver, OIConstants.kJoystickTrigger)
+        .onTrue(new InstantCommand(() -> sub_drivetrain.setFieldRelative(!sub_drivetrain.isFieldRelative())));
+
+    /* Operator controller */
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
+  // Use this to pass the autonomous command to the main Robot class.
   public Command getAutonomousCommand() {
     return null;
   }

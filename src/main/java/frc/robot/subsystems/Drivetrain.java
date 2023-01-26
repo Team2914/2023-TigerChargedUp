@@ -1,15 +1,16 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkMax;
-
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.ADIS16470_IMU;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivetrainConstants;
+
+import com.kauailabs.navx.frc.AHRS;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -18,8 +19,9 @@ public class Drivetrain extends SubsystemBase {
     private SwerveModule m_backLeft;
     private SwerveModule m_frontRight;
     private SwerveModule m_backRight;
-    private ADIS16470_IMU gyro;
+    private AHRS gyro;
     private SwerveDriveOdometry odometry;
+    private boolean bFieldRelative;
 
     public Drivetrain() {
         m_frontLeft = new SwerveModule(
@@ -39,7 +41,7 @@ public class Drivetrain extends SubsystemBase {
             DrivetrainConstants.kBackRightTurningPort, 
             DrivetrainConstants.kBackRightChassisAngularOffset);
 
-        gyro = new ADIS16470_IMU();
+        gyro = new AHRS(SerialPort.Port.kUSB);
 
         odometry = new SwerveDriveOdometry(
             DrivetrainConstants.kDriveKinematics, 
@@ -52,6 +54,7 @@ public class Drivetrain extends SubsystemBase {
             }
             );
 
+        bFieldRelative = false;
     }
 
     // Update odometry
@@ -85,10 +88,19 @@ public class Drivetrain extends SubsystemBase {
             },
             pose);
     }
+
+    public void setModuleStates(SwerveModuleState[] desiredStates) {
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DrivetrainConstants.kMaxSpeedMetersPerSecond);
+
+        m_frontLeft.setDesiredState(desiredStates[0]);
+        m_frontRight.setDesiredState(desiredStates[1]);
+        m_backLeft.setDesiredState(desiredStates[2]);
+        m_backRight.setDesiredState(desiredStates[3]);
+    }
     
     // X dir: forward backwards
     // Y dir: side to side
-    public void drive(double fXSpeed, double fYSpeed, double fRot, boolean bFieldRelative) {
+    public void drive(double fXSpeed, double fYSpeed, double fRot) {
         fXSpeed *= DrivetrainConstants.kMaxSpeedMetersPerSecond;
         fYSpeed *= DrivetrainConstants.kMaxSpeedMetersPerSecond;
         fRot *= DrivetrainConstants.kMaxAngularSpeed;
@@ -99,12 +111,7 @@ public class Drivetrain extends SubsystemBase {
         SwerveModuleState[] moduleStates = DrivetrainConstants.kDriveKinematics.toSwerveModuleStates(
             bFieldRelative ?  fieldRelativeSpeeds : new ChassisSpeeds(fXSpeed, fYSpeed, fRot));
 
-        SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, DrivetrainConstants.kMaxSpeedMetersPerSecond);
-
-        m_frontLeft.setDesiredState(moduleStates[0]);
-        m_frontRight.setDesiredState(moduleStates[1]);
-        m_backLeft.setDesiredState(moduleStates[2]);
-        m_backRight.setDesiredState(moduleStates[3]);
+        setModuleStates(moduleStates);
     }
 
     // Stop movement by setting the wheels to an X formation
@@ -113,15 +120,6 @@ public class Drivetrain extends SubsystemBase {
         m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
         m_backLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
         m_backRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-    }
-
-    public void setModuleStates(SwerveModuleState[] desiredStates) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DrivetrainConstants.kMaxSpeedMetersPerSecond);
-
-        m_frontLeft.setDesiredState(desiredStates[0]);
-        m_frontRight.setDesiredState(desiredStates[1]);
-        m_backLeft.setDesiredState(desiredStates[2]);
-        m_backRight.setDesiredState(desiredStates[3]);
     }
 
     public void resetEncoders() {
@@ -141,5 +139,13 @@ public class Drivetrain extends SubsystemBase {
 
     public double getTurnRate() {
         return gyro.getRate() * (DrivetrainConstants.kGyroReversed ? -1.0 : 1.0);
+    }
+
+    public boolean isFieldRelative() {
+        return bFieldRelative;
+    }
+
+    public void setFieldRelative(boolean val) {
+        bFieldRelative = val;
     }
 }
