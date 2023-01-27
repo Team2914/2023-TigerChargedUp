@@ -7,7 +7,10 @@ package frc.robot;
 import com.revrobotics.CANSparkMax.IdleMode;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 
 public final class Constants {
 
@@ -110,5 +113,12 @@ public final class Constants {
 
     // Camera
     public static final String kCameraName = "HD_Pro_Webcam_C920";
+  }
+
+  public static final class VisionConstants {
+    public static final Transform3d kRobotToCam = new Transform3d(
+      new Translation3d(0, 0, 0),
+      new Rotation3d(0, 0, 0)
+    );
   }
 }

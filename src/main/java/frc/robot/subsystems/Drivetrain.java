@@ -1,8 +1,9 @@
 package frc.robot.subsystems;
 
+import java.util.Optional;
+import org.photonvision.EstimatedRobotPose;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.SerialPort;
@@ -11,6 +12,7 @@ import frc.robot.Constants.DrivetrainConstants;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -20,10 +22,14 @@ public class Drivetrain extends SubsystemBase {
     private SwerveModule m_frontRight;
     private SwerveModule m_backRight;
     private AHRS gyro;
-    private SwerveDriveOdometry odometry;
+    private SwerveDrivePoseEstimator odometry;
+    private SwerveDriveKinematics kinematics;
     private boolean bFieldRelative;
 
+    private PhotonAprilTags photon;
+
     public Drivetrain() {
+        // Swerve modules
         m_frontLeft = new SwerveModule(
             DrivetrainConstants.kFrontLeftDrivePort, 
             DrivetrainConstants.kFrontLeftTurningPort, 
@@ -41,52 +47,68 @@ public class Drivetrain extends SubsystemBase {
             DrivetrainConstants.kBackRightTurningPort, 
             DrivetrainConstants.kBackRightChassisAngularOffset);
 
+        bFieldRelative = false;    
+        // NavX
         gyro = new AHRS(SerialPort.Port.kUSB);
-
-        odometry = new SwerveDriveOdometry(
-            DrivetrainConstants.kDriveKinematics, 
-            Rotation2d.fromDegrees(gyro.getAngle()),
-            new SwerveModulePosition[] {
-                m_frontLeft.getPosition(),
-                m_frontRight.getPosition(),
-                m_backLeft.getPosition(),
-                m_backRight.getPosition()
-            }
-            );
-
-        bFieldRelative = false;
-    }
-
-    // Update odometry
-    @Override
-    public void periodic() {
-        odometry.update(
-            Rotation2d.fromDegrees(gyro.getAngle()),
-            new SwerveModulePosition[] {
-                m_frontLeft.getPosition(),
-                m_frontRight.getPosition(),
-                m_backLeft.getPosition(),
-                m_backRight.getPosition()
-            }
-            );
-    }
-
-    // Returns the current pose of the robot
-    public Pose2d getPose2d() {
-        return odometry.getPoseMeters();
-    }
-
-    // Resets the odometry to the specified pose
-    public void resetOdometry(Pose2d pose) {
-        odometry.resetPosition(
-            Rotation2d.fromDegrees(gyro.getAngle()),
+        // Swerve kinematics
+        kinematics = DrivetrainConstants.kDriveKinematics;
+        // Odometry / pose estimator
+        odometry = new SwerveDrivePoseEstimator(
+            kinematics, 
+            gyro.getRotation2d(),
             new SwerveModulePosition[] {
                 m_frontLeft.getPosition(),
                 m_frontRight.getPosition(),
                 m_backLeft.getPosition(),
                 m_backRight.getPosition()
             },
-            pose);
+            new Pose2d()
+        );
+
+        // PhotonVision
+        photon = new PhotonAprilTags();    
+        
+    }
+
+    // Update odometry
+    @Override
+    public void periodic() {
+        odometry.update(
+            gyro.getRotation2d(),
+            new SwerveModulePosition[] {
+                m_frontLeft.getPosition(),
+                m_frontRight.getPosition(),
+                m_backLeft.getPosition(),
+                m_backRight.getPosition()
+            }
+        );
+
+        Optional<EstimatedRobotPose> visionResult = photon.getEstimatedRobotPose(odometry.getEstimatedPosition());
+
+        if (!visionResult.isPresent()) return;
+        
+        // Update odometry if an AprilTag is found
+        EstimatedRobotPose cameraPose = visionResult.get();
+        odometry.addVisionMeasurement(cameraPose.estimatedPose.toPose2d(), cameraPose.timestampSeconds);
+    }
+
+    // Returns the current pose of the robot
+    public Pose2d getEstimatedPos() {
+        return odometry.getEstimatedPosition();
+    }
+
+    // Resets the odometry to the specified pose
+    public void resetOdometry(Pose2d pose) {
+        odometry.resetPosition(
+            gyro.getRotation2d(),
+            new SwerveModulePosition[] {
+                m_frontLeft.getPosition(),
+                m_frontRight.getPosition(),
+                m_backLeft.getPosition(),
+                m_backRight.getPosition()
+            },
+            pose
+        );
     }
 
     public void setModuleStates(SwerveModuleState[] desiredStates) {
@@ -106,7 +128,7 @@ public class Drivetrain extends SubsystemBase {
         fRot *= DrivetrainConstants.kMaxAngularSpeed;
 
         ChassisSpeeds fieldRelativeSpeeds = 
-            ChassisSpeeds.fromFieldRelativeSpeeds(fXSpeed, fYSpeed, fRot, Rotation2d.fromDegrees(gyro.getAngle()));
+            ChassisSpeeds.fromFieldRelativeSpeeds(fXSpeed, fYSpeed, fRot, gyro.getRotation2d());
 
         SwerveModuleState[] moduleStates = DrivetrainConstants.kDriveKinematics.toSwerveModuleStates(
             bFieldRelative ?  fieldRelativeSpeeds : new ChassisSpeeds(fXSpeed, fYSpeed, fRot));
@@ -134,7 +156,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public double getHeading() {
-        return Rotation2d.fromDegrees(gyro.getAngle()).getDegrees();
+        return gyro.getRotation2d().getDegrees();
     }
 
     public double getTurnRate() {
