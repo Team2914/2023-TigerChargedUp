@@ -4,43 +4,51 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.math.MathUtil;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.SwerveDrive;
-import frc.robot.subsystems.*;
+import frc.robot.subsystems.Drivetrain;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
 
-// The container for the robot. Contains subsystems, OI devices, and commands.
 public class RobotContainer {
-  
-  private final Drivetrain sub_drivetrain;
-  private final Joystick con_driver;
-  
-  public RobotContainer() {
-    sub_drivetrain = new Drivetrain();
-    con_driver = new Joystick(OIConstants.kDriverControllerPort); 
-                                                    
-    sub_drivetrain.setDefaultCommand(new SwerveDrive(sub_drivetrain, 
-                                                    () -> con_driver.getX(), 
-                                                    () -> con_driver.getY(), 
-                                                    () -> con_driver.getZ()));
-    
-    configureBindings();
-  }
+    private final Drivetrain sub_drivetrain = new Drivetrain();
 
-  private void configureBindings() {
-    /* Driver controller */
-    // Trigger toggles field relative driving
-    new JoystickButton(con_driver, OIConstants.kJoystickTrigger)
-        .onTrue(new InstantCommand(() -> sub_drivetrain.setFieldRelative(!sub_drivetrain.isFieldRelative())));
+    Joystick m_driverController = new Joystick(OIConstants.kDriverControllerPort);
+    //XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
-    /* Operator controller */
-  }
+    /**
+    * The container for the robot. Contains subsystems, OI devices, and commands.
+    */
+    public RobotContainer() {
+        configureButtonBindings();
 
-  // Use this to pass the autonomous command to the main Robot class.
-  public Command getAutonomousCommand() {
-    return null;
-  }
+    sub_drivetrain.setDefaultCommand(
+        new RunCommand(() -> sub_drivetrain.drive(
+                MathUtil.applyDeadband(-m_driverController.getY(), 0.06),
+                MathUtil.applyDeadband(-m_driverController.getX(), 0.06),
+                MathUtil.applyDeadband(-m_driverController.getZ(), 0.06),
+                true),
+                sub_drivetrain));
+
+    /*sub_drivetrain.setDefaultCommand(
+        new RunCommand(() -> sub_drivetrain.drive(
+                MathUtil.applyDeadband(-m_driverController.getLeftY() * 0.5, 0.06), 
+                MathUtil.applyDeadband(-m_driverController.getLeftX() * 0.5, 0.06), 
+                MathUtil.applyDeadband(-m_driverController.getRightX() * 0.5, 0.06), 
+                false), 
+        sub_drivetrain)
+    );*/
+    }
+
+    private void configureButtonBindings() {
+        new JoystickButton(m_driverController, 1)
+            .whileTrue(new RunCommand(() -> sub_drivetrain.setX(), sub_drivetrain));
+    }
+
+    public Command getAutonomousCommand() {
+        return null;
+    }
 }

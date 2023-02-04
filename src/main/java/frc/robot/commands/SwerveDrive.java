@@ -3,6 +3,7 @@ package frc.robot.commands;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
 
@@ -28,15 +29,15 @@ public class SwerveDrive extends CommandBase {
 
     @Override
     public void execute() {
-        sub_drivetrain.drive(MathUtil.applyDeadband(fXSpeed.get(), 0.05), 
-                             MathUtil.applyDeadband(fYSpeed.get(), 0.05), 
-                             MathUtil.applyDeadband(fRot.get(), 0.05));
-
+        sub_drivetrain.drive(MathUtil.applyDeadband(-fYSpeed.get(), 0.05), 
+                             MathUtil.applyDeadband(-fXSpeed.get(), 0.05), 
+                             MathUtil.applyDeadband(-fRot.get(), 0.05));
+        
     }
 
     @Override
     public void end(boolean interrupted) {
-        sub_drivetrain.stop();
+        
     }
 
     @Override
