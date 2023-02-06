@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.photonvision.EstimatedRobotPose;
+import java.util.Optional;
 
 public class Drivetrain extends SubsystemBase {
   // Create MAXSwerveModules
@@ -42,6 +44,7 @@ public class Drivetrain extends SubsystemBase {
       DriveConstants.kBackRightChassisAngularOffset);
 
   private final AHRS gyro;
+  private final PhotonAprilTags photon = new PhotonAprilTags();
 
   // Odometry class for tracking robot pose
   SwerveDrivePoseEstimator poseEstimator;
@@ -65,8 +68,8 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    System.out.println("Connected? " + gyro.isConnected());
-    System.out.println("Calibrating? " + gyro.isCalibrating());
+    //System.out.println("Connected? " + gyro.isConnected());
+    //System.out.println("Calibrating? " + gyro.isCalibrating());
     
     poseEstimator.update(
         gyro.getRotation2d(),
@@ -77,7 +80,13 @@ public class Drivetrain extends SubsystemBase {
             m_rearRight.getPosition()
         });
 
-    SmartDashboard.putNumber("SSS", gyro.getAngle());
+    Optional<EstimatedRobotPose> camResult = photon.getEstimatedRobotPose(poseEstimator.getEstimatedPosition());
+
+    if (!camResult.isPresent()) return;
+
+    EstimatedRobotPose camPose = camResult.get();
+    poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
+    
   }
 
   public Pose2d getPose() {
