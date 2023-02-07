@@ -38,8 +38,11 @@ public class RobotContainer {
     }
 
     private void configureButtonBindings() {
+        // Trigger for brake
         new JoystickButton(m_driverController, OIConstants.kJoystickTrigger)
             .whileTrue(new RunCommand(() -> sub_drivetrain.setX(), sub_drivetrain));
+
+        // Hat controls 
         new POVButton(m_driverController, 90)
             .whileTrue(new RunCommand(() -> sub_drivetrain.drive(
                 0, 

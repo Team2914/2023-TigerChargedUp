@@ -5,7 +5,9 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
-
+import frc.robot.utils.BNO055;
+import frc.robot.utils.BNO055.opmode_t;
+import frc.robot.utils.BNO055.vector_type_t;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -44,16 +46,16 @@ public class Drivetrain extends SubsystemBase {
       DriveConstants.kRearRightTurningCanId,
       DriveConstants.kBackRightChassisAngularOffset);
 
-  private final AHRS gyro;
+  //private final AHRS gyro;
+  private final BNO055 gyro;
   private final PhotonAprilTags photon = new PhotonAprilTags();
   private Field2d field = new Field2d();
-
-  // Odometry class for tracking robot pose
   SwerveDrivePoseEstimator poseEstimator;
 
   /** Creates a new DriveSubsystem. */
   public Drivetrain() {
-    gyro = new AHRS(I2C.Port.kMXP);
+    //gyro = new AHRS(I2C.Port.kMXP);
+    gyro = BNO055.getInstance(opmode_t.OPERATION_MODE_IMUPLUS, vector_type_t.VECTOR_EULER);
 
     poseEstimator = new SwerveDrivePoseEstimator(
       DriveConstants.kDriveKinematics,
@@ -72,7 +74,8 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     //System.out.println("Connected? " + gyro.isConnected());
     //System.out.println("Calibrating? " + gyro.isCalibrating());
-    
+    SmartDashboard.putBoolean("Gyro calibrated?", gyro.isCalibrated());
+
     poseEstimator.update(
         gyro.getRotation2d(),
         new SwerveModulePosition[] {
@@ -152,7 +155,7 @@ public class Drivetrain extends SubsystemBase {
 
   /** Zeroes the heading of the robot. */
   public void zeroHeading() {
-    gyro.reset();
+    //gyro.reset();
   }
 
   /**
