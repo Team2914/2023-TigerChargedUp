@@ -42,7 +42,28 @@ public class RobotContainer {
             .whileTrue(new RunCommand(() -> sub_drivetrain.setX(), sub_drivetrain));
         new POVButton(m_driverController, 90)
             .whileTrue(new RunCommand(() -> sub_drivetrain.drive(
-                0.2, 
+                0, 
+                -0.04, 
+                0, 
+                false), 
+                sub_drivetrain));
+        new POVButton(m_driverController, 270)
+            .whileTrue(new RunCommand(() -> sub_drivetrain.drive(
+                0, 
+                0.04, 
+                0, 
+                false), 
+                sub_drivetrain));
+        new POVButton(m_driverController, 0)
+            .whileTrue(new RunCommand(() -> sub_drivetrain.drive(
+                0.04, 
+                0, 
+                0, 
+                false), 
+                sub_drivetrain));
+        new POVButton(m_driverController, 180)
+            .whileTrue(new RunCommand(() -> sub_drivetrain.drive(
+                -0.04, 
                 0, 
                 0, 
                 false), 
