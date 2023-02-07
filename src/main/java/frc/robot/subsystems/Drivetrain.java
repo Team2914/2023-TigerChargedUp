@@ -15,6 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -45,6 +46,7 @@ public class Drivetrain extends SubsystemBase {
 
   private final AHRS gyro;
   private final PhotonAprilTags photon = new PhotonAprilTags();
+  private Field2d field = new Field2d();
 
   // Odometry class for tracking robot pose
   SwerveDrivePoseEstimator poseEstimator;
@@ -63,7 +65,7 @@ public class Drivetrain extends SubsystemBase {
           m_rearRight.getPosition()
       },
       new Pose2d());
-
+      SmartDashboard.putData("Field", field);
   }
 
   @Override
@@ -79,6 +81,7 @@ public class Drivetrain extends SubsystemBase {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });
+    field.setRobotPose(poseEstimator.getEstimatedPosition());    
 
     Optional<EstimatedRobotPose> camResult = photon.getEstimatedRobotPose(poseEstimator.getEstimatedPosition());
 
