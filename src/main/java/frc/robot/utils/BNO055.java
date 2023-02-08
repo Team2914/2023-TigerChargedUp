@@ -375,7 +375,7 @@ import edu.wpi.first.wpilibj.Timer;
 	 * @return the instantiated BNO055 object
 	 */
 	public static BNO055 getInstance(opmode_t mode, vector_type_t vectorType) {
-		return getInstance(mode, vectorType, I2C.Port.kOnboard,
+		return getInstance(mode, vectorType, I2C.Port.kMXP,
 				BNO055_ADDRESS_A);
 	}
 
@@ -755,6 +755,7 @@ import edu.wpi.first.wpilibj.Timer;
 	 * @return heading in degrees
 	 */
 	public double getHeading() {
+		
 		return xyz[0] + turns * 360;
 	}
 	
