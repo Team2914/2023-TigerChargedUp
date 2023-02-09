@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+
+
 import com.kauailabs.navx.frc.AHRS;
 import frc.robot.utils.BNO055;
 import frc.robot.utils.BNO055.opmode_t;
@@ -75,6 +77,7 @@ public class Drivetrain extends SubsystemBase {
     //System.out.println("Calibrating? " + gyro.isCalibrating());
     SmartDashboard.putBoolean("Gyro calibrated?", gyro.isCalibrated());
     SmartDashboard.putNumber("Heading", gyro.getVector()[0]);
+    SmartDashboard.putNumber("Pose X", poseEstimator.getEstimatedPosition().getX());
 
     poseEstimator.update(
         gyro.getRotation2d(),
@@ -114,7 +117,14 @@ public class Drivetrain extends SubsystemBase {
     ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
     rot *= DriveConstants.kMaxAngularSpeed;
 
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSpeed, ySpeed, rot));
+    //var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSpeed, ySpeed, rot));
+    //SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+
+    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(fieldRelative ? 
+      ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d()) :
+      new ChassisSpeeds(xSpeed, ySpeed, rot)
+    );
+
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
 
     moduleFrontLeft.setDesiredState(swerveModuleStates[0]);
@@ -145,6 +155,15 @@ public class Drivetrain extends SubsystemBase {
     moduleRearRight.setDesiredState(desiredStates[3]);
   }
 
+  public void setModuleStates(ChassisSpeeds chassisSpeeds) {
+    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+
+    moduleFrontLeft.setDesiredState(swerveModuleStates[0]);
+    moduleFrontRight.setDesiredState(swerveModuleStates[1]);
+    moduleRearLeft.setDesiredState(swerveModuleStates[2]);
+    moduleRearRight.setDesiredState(swerveModuleStates[3]);
+  }
+
   /** Resets the drive encoders to currently read a position of 0. */
   public void resetEncoders() {
     moduleFrontLeft.resetEncoders();
@@ -156,6 +175,18 @@ public class Drivetrain extends SubsystemBase {
   /** Zeroes the heading of the robot. */
   public void zeroHeading() {
     //gyro.reset();
+  }
+
+  public void resetPose(Pose2d pose) {
+    poseEstimator.resetPosition(
+      gyro.getRotation2d(), 
+      new SwerveModulePosition[] {
+        moduleFrontLeft.getPosition(),
+        moduleFrontRight.getPosition(),
+        moduleRearLeft.getPosition(),
+        moduleRearRight.getPosition()
+      }, 
+      pose);
   }
 
   /**

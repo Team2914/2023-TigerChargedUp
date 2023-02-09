@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.XboxController;
 
 public class RobotContainer {
     private final AutoManager autoManager;
-    private final Drivetrain drivetrain = new Drivetrain();
+    private static final Drivetrain drivetrain = new Drivetrain();
 
     Joystick driverController = new Joystick(OIConstants.kDriverControllerPort);
     //XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -35,7 +35,7 @@ public class RobotContainer {
                 MathUtil.applyDeadband(-driverController.getY(), 0.06),
                 MathUtil.applyDeadband(-driverController.getX(), 0.06),
                 MathUtil.applyDeadband(-driverController.getZ(), 0.06),
-                true),
+                false),
                 drivetrain));
 
     }
@@ -76,7 +76,11 @@ public class RobotContainer {
                 drivetrain));
     }
 
+    public static Drivetrain getDrivetrain() {
+        return drivetrain;
+    }
+
     public Command getAutonomousCommand() {
-        return null;
+        return autoManager.getAutonomousCommand();
     }
 }
