@@ -73,10 +73,10 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    //System.out.println("Connected? " + gyro.isConnected());
+    SmartDashboard.putBoolean("Connected?", gyro.isSensorPresent());
     //System.out.println("Calibrating? " + gyro.isCalibrating());
     SmartDashboard.putBoolean("Gyro calibrated?", gyro.isCalibrated());
-    SmartDashboard.putNumber("Heading", gyro.getVector()[0]);
+    SmartDashboard.putNumber("Heading", gyro.getHeading());
     SmartDashboard.putNumber("Pose X", poseEstimator.getEstimatedPosition().getX());
 
     poseEstimator.update(

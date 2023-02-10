@@ -834,6 +834,13 @@ import edu.wpi.first.wpilibj.Timer;
 	}
 
     public Rotation2d getRotation2d() {
-        return Rotation2d.fromDegrees(xyz[0]);
+        double yaw = -getVector()[0] + 180;
+		if (yaw > 180) {
+			yaw -= 360;
+		} else if (yaw < -180) {
+			yaw += 360;
+		}
+
+		return Rotation2d.fromDegrees(yaw);
     }
 }
