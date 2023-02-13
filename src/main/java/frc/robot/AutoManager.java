@@ -27,28 +27,28 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.ModuleConstants;
+import frc.robot.commands.SwerveAutoBuilderEx;
 
 /* AutoManager singleton. It manages autonomous opmodes. */
 public class AutoManager {
     private static AutoManager instance = null;
     private HashMap<String, Command> eventMap;
-    private SwerveAutoBuilder autoBuilder;
+    private SwerveAutoBuilderEx autoBuilder;
     private final SendableChooser<Command> autoChooser;
 
     private AutoManager() {
         eventMap = buildEventMap();
         Drivetrain drivetrain = RobotContainer.getDrivetrain();
-        autoBuilder = new SwerveAutoBuilder(
+        autoBuilder = new SwerveAutoBuilderEx(
             drivetrain::getPose, 
             drivetrain::resetPose,
             DriveConstants.kDriveKinematics, 
-            //new PIDConstants(ModuleConstants.kDrivingP, ModuleConstants.kDrivingI, ModuleConstants.kDrivingD), 
-            //new PIDConstants(ModuleConstants.kTurningP, ModuleConstants.kTurningI, ModuleConstants.kTurningD), 
-            new PIDConstants(AutoConstants.kPXController, 0, 0),
-            new PIDConstants(AutoConstants.kPThetaController, 0, 0),
+            new PIDConstants(2.22, 0, 0),
+            new PIDConstants(2.22, 0, 0),
+            new PIDConstants(5, 0, 0),
             drivetrain::setModuleStates, 
             eventMap, 
+            false,
             drivetrain);
 
         autoChooser = new SendableChooser<>();

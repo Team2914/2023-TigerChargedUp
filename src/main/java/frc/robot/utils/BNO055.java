@@ -833,14 +833,14 @@ import edu.wpi.first.wpilibj.Timer;
 		}
 	}
 
+	/** Outputs a heading angle from -180 to 180 degrees*/
     public Rotation2d getRotation2d() {
-        double yaw = -getVector()[0] + 180;
-		if (yaw > 180) {
-			yaw -= 360;
-		} else if (yaw < -180) {
-			yaw += 360;
-		}
-
-		return Rotation2d.fromDegrees(yaw);
+		double yaw = 180 - (getVector()[0] + 180);
+    	if (yaw > 180) {
+      		yaw -= 360;
+    	} else if (yaw < -180) {
+      		yaw += 360;
+    	}
+        return Rotation2d.fromDegrees(yaw);
     }
 }

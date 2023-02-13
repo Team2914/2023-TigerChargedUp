@@ -20,6 +20,7 @@ public class RobotContainer {
     private static final Drivetrain drivetrain = new Drivetrain();
 
     Joystick driverController = new Joystick(OIConstants.kDriverControllerPort);
+    boolean isFieldRelativePressed = false;
     //XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
     /**
@@ -34,8 +35,7 @@ public class RobotContainer {
             new RunCommand(() -> drivetrain.drive(
                 MathUtil.applyDeadband(-driverController.getY(), 0.06),
                 MathUtil.applyDeadband(-driverController.getX(), 0.06),
-                MathUtil.applyDeadband(-driverController.getZ(), 0.06),
-                false),
+                MathUtil.applyDeadband(-driverController.getZ(), 0.06)),
                 drivetrain));
 
     }
@@ -45,34 +45,41 @@ public class RobotContainer {
         new JoystickButton(driverController, OIConstants.kJoystickTrigger)
             .whileTrue(new RunCommand(() -> drivetrain.setX(), drivetrain));
 
+        new JoystickButton(driverController, 8)
+            .whileTrue(new RunCommand(() -> {
+                if (!isFieldRelativePressed) {
+                    isFieldRelativePressed = true;
+                    drivetrain.setFieldRelative(!drivetrain.isFieldRelative());
+                } else if (isFieldRelativePressed) {
+                    isFieldRelativePressed = false;
+                }
+                
+            }, drivetrain));
+
         // Hat controls 
         new POVButton(driverController, 90)
             .whileTrue(new RunCommand(() -> drivetrain.drive(
                 0, 
                 -0.04, 
-                0, 
-                false), 
+                0), 
                 drivetrain));
         new POVButton(driverController, 270)
             .whileTrue(new RunCommand(() -> drivetrain.drive(
                 0, 
                 0.04, 
-                0, 
-                false), 
+                0), 
                 drivetrain));
         new POVButton(driverController, 0)
             .whileTrue(new RunCommand(() -> drivetrain.drive(
                 0.04, 
                 0, 
-                0, 
-                false), 
+                0), 
                 drivetrain));
         new POVButton(driverController, 180)
             .whileTrue(new RunCommand(() -> drivetrain.drive(
                 -0.04, 
                 0, 
-                0, 
-                false), 
+                0), 
                 drivetrain));
     }
 

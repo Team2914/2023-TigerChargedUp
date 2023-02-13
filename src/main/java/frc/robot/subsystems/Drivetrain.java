@@ -52,6 +52,7 @@ public class Drivetrain extends SubsystemBase {
   private final PhotonAprilTags photon = new PhotonAprilTags();
   private Field2d field = new Field2d();
   SwerveDrivePoseEstimator poseEstimator;
+  boolean isFieldRelative = false;
 
   /** Creates a new DriveSubsystem. */
   public Drivetrain() {
@@ -73,11 +74,10 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putBoolean("Connected?", gyro.isSensorPresent());
-    //System.out.println("Calibrating? " + gyro.isCalibrating());
     SmartDashboard.putBoolean("Gyro calibrated?", gyro.isCalibrated());
-    SmartDashboard.putNumber("Heading", gyro.getHeading());
+    SmartDashboard.putNumber("Heading", gyro.getRotation2d().getDegrees());
     SmartDashboard.putNumber("Pose X", poseEstimator.getEstimatedPosition().getX());
+    SmartDashboard.putBoolean("Field relative", isFieldRelative);
 
     poseEstimator.update(
         gyro.getRotation2d(),
@@ -87,6 +87,7 @@ public class Drivetrain extends SubsystemBase {
             moduleRearLeft.getPosition(),
             moduleRearRight.getPosition()
         });
+
     field.setRobotPose(poseEstimator.getEstimatedPosition());    
 
     Optional<EstimatedRobotPose> camResult = photon.getEstimatedRobotPose(poseEstimator.getEstimatedPosition());
@@ -108,19 +109,15 @@ public class Drivetrain extends SubsystemBase {
    * @param xSpeed        Speed of the robot in the x direction (forward).
    * @param ySpeed        Speed of the robot in the y direction (sideways).
    * @param rot           Angular rate of the robot.
-   * @param fieldRelative Whether the provided x and y speeds are relative to the
-   *                      field.
+   * 
    */
-  public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+  public void drive(double xSpeed, double ySpeed, double rot) {
     // Adjust input based on max speed
     xSpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
     ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
     rot *= DriveConstants.kMaxAngularSpeed;
 
-    //var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSpeed, ySpeed, rot));
-    //SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
-
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(fieldRelative ? 
+    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(isFieldRelative ? 
       ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d()) :
       new ChassisSpeeds(xSpeed, ySpeed, rot)
     );
@@ -156,7 +153,9 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void setModuleStates(ChassisSpeeds chassisSpeeds) {
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+    SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
 
     moduleFrontLeft.setDesiredState(swerveModuleStates[0]);
     moduleFrontRight.setDesiredState(swerveModuleStates[1]);
@@ -189,21 +188,12 @@ public class Drivetrain extends SubsystemBase {
       pose);
   }
 
-  /**
-   * Returns the heading of the robot.
-   *
-   * @return the robot's heading in degrees, from -180 to 180
-   */
-  /*public double getHeading() {
-    return Rotation2d.fromDegrees(m_gyro.getAngle()).getDegrees();
-  }*/
+  public void setFieldRelative(boolean fieldRelative) {
+    this.isFieldRelative = fieldRelative;
+  }
 
-  /**
-   * Returns the turn rate of the robot.
-   *
-   * @return The turn rate of the robot, in degrees per second
-   */
-  /*public double getTurnRate() {
-    return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
-  }*/
+  public boolean isFieldRelative() {
+    return isFieldRelative;
+  }
+
 }
