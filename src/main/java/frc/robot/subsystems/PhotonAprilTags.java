@@ -20,7 +20,7 @@ public class PhotonAprilTags {
     private final PhotonPoseEstimator poseEstimator;
 
     public PhotonAprilTags() {
-        camera = new PhotonCamera(OIConstants.kCameraName);
+        camera = new PhotonCamera(OIConstants.PHOTON_CAMERA_NAME);
         AprilTagFieldLayout fieldLayout = null;
         
         try {
@@ -32,7 +32,7 @@ public class PhotonAprilTags {
         poseEstimator = new PhotonPoseEstimator(fieldLayout,
                                                 PoseStrategy.CLOSEST_TO_REFERENCE_POSE, 
                                                 camera, 
-                                                VisionConstants.kRobotToCam);
+                                                VisionConstants.ROBOT_TO_CAM);
     }
 
     public Optional<EstimatedRobotPose> getEstimatedRobotPose(Pose2d previousEstimatedPose) {

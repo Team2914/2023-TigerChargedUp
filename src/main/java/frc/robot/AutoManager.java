@@ -42,7 +42,7 @@ public class AutoManager {
         autoBuilder = new SwerveAutoBuilderEx(
             drivetrain::getPose, 
             drivetrain::resetPose,
-            DriveConstants.kDriveKinematics, 
+            DriveConstants.DRIVE_KINEMATICS, 
             new PIDConstants(2.22, 0, 0),
             new PIDConstants(2.22, 0, 0),
             new PIDConstants(5, 0, 0),
@@ -69,15 +69,15 @@ public class AutoManager {
     
     private CommandBase PIDTEST() {
         return autoBuilder.fullAuto(
-            PathPlanner.loadPath("PIDTEST", new PathConstraints(AutoConstants.kMaxSpeedMetersPerSecond, AutoConstants.kMaxAccelerationMetersPerSecondSquared))
+            PathPlanner.loadPath("PIDTEST", new PathConstraints(AutoConstants.MAX_SPEED_METERS_PER_SECOND, AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED))
         );
     }
 
     private CommandBase PIDLINE() {
         TrajectoryConfig config = new TrajectoryConfig(
-            AutoConstants.kMaxSpeedMetersPerSecond, 
-            AutoConstants.kMaxAccelerationMetersPerSecondSquared)
-            .setKinematics(DriveConstants.kDriveKinematics);
+            AutoConstants.MAX_SPEED_METERS_PER_SECOND, 
+            AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED)
+            .setKinematics(DriveConstants.DRIVE_KINEMATICS);
 
         Trajectory traj = TrajectoryGenerator.generateTrajectory(
             new Pose2d(0, 0, new Rotation2d(0)), 
@@ -94,7 +94,7 @@ public class AutoManager {
         SwerveControllerCommand cmd = new SwerveControllerCommand(
             traj, 
             drivetrain::getPose, 
-            DriveConstants.kDriveKinematics, 
+            DriveConstants.DRIVE_KINEMATICS, 
             new PIDController(AutoConstants.kPXController, 0, 0),
             new PIDController(AutoConstants.kPYController, 0, 0),
             thetaController,

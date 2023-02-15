@@ -28,24 +28,24 @@ import java.util.Optional;
 public class Drivetrain extends SubsystemBase {
   // Create MAXSwerveModules
   private final MAXSwerveModule moduleFrontLeft = new MAXSwerveModule(
-      DriveConstants.kFrontLeftDrivingCanId,
-      DriveConstants.kFrontLeftTurningCanId,
-      DriveConstants.kFrontLeftChassisAngularOffset);
+      DriveConstants.FRONT_LEFT_DRIVE_CAN_ID,
+      DriveConstants.FRONT_LEFT_TURN_CAN_ID,
+      DriveConstants.FRONT_LEFT_ANGULAR_OFFSET);
 
   private final MAXSwerveModule moduleFrontRight = new MAXSwerveModule(
-      DriveConstants.kFrontRightDrivingCanId,
-      DriveConstants.kFrontRightTurningCanId,
-      DriveConstants.kFrontRightChassisAngularOffset);
+      DriveConstants.FRONT_RIGHT_DRIVE_CAN_ID,
+      DriveConstants.FRONT_RIGHT_TURN_CAN_ID,
+      DriveConstants.FRONT_RIGHT_ANGULAR_OFFSET);
 
   private final MAXSwerveModule moduleRearLeft = new MAXSwerveModule(
-      DriveConstants.kRearLeftDrivingCanId,
-      DriveConstants.kRearLeftTurningCanId,
-      DriveConstants.kBackLeftChassisAngularOffset);
+      DriveConstants.REAR_LEFT_DRIVE_CAN_ID,
+      DriveConstants.REAR_LEFT_TURN_CAN_ID,
+      DriveConstants.BACK_LEFT_ANGULAR_OFFSET);
 
   private final MAXSwerveModule moduleRearRight = new MAXSwerveModule(
-      DriveConstants.kRearRightDrivingCanId,
-      DriveConstants.kRearRightTurningCanId,
-      DriveConstants.kBackRightChassisAngularOffset);
+      DriveConstants.REAR_RIGHT_DRIVE_CAN_ID,
+      DriveConstants.REAR_RIGHT_TURN_CAN_ID,
+      DriveConstants.BACK_RIGHT_ANGULAR_OFFSET);
 
   //private final AHRS gyro;
   private final BNO055 gyro;
@@ -60,7 +60,7 @@ public class Drivetrain extends SubsystemBase {
     gyro = BNO055.getInstance(opmode_t.OPERATION_MODE_IMUPLUS, vector_type_t.VECTOR_EULER);
 
     poseEstimator = new SwerveDrivePoseEstimator(
-      DriveConstants.kDriveKinematics,
+      DriveConstants.DRIVE_KINEMATICS,
       gyro.getRotation2d(),
       new SwerveModulePosition[] {
           moduleFrontLeft.getPosition(),
@@ -113,16 +113,16 @@ public class Drivetrain extends SubsystemBase {
    */
   public void drive(double xSpeed, double ySpeed, double rot) {
     // Adjust input based on max speed
-    xSpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
-    ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
-    rot *= DriveConstants.kMaxAngularSpeed;
+    xSpeed *= DriveConstants.MAX_SPEED_METERS_PER_SECOND;
+    ySpeed *= DriveConstants.MAX_SPEED_METERS_PER_SECOND;
+    rot *= DriveConstants.MAX_ANGULAR_SPEED;
 
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(isFieldRelative ? 
+    var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(isFieldRelative ? 
       ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d()) :
       new ChassisSpeeds(xSpeed, ySpeed, rot)
     );
 
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.MAX_SPEED_METERS_PER_SECOND);
 
     moduleFrontLeft.setDesiredState(swerveModuleStates[0]);
     moduleFrontRight.setDesiredState(swerveModuleStates[1]);
@@ -145,7 +145,7 @@ public class Drivetrain extends SubsystemBase {
    */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(
-        desiredStates, DriveConstants.kMaxSpeedMetersPerSecond);
+        desiredStates, DriveConstants.MAX_SPEED_METERS_PER_SECOND);
     moduleFrontLeft.setDesiredState(desiredStates[0]);
     moduleFrontRight.setDesiredState(desiredStates[1]);
     moduleRearLeft.setDesiredState(desiredStates[2]);
@@ -153,9 +153,9 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void setModuleStates(ChassisSpeeds chassisSpeeds) {
-    SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+    SwerveModuleState[] swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds);
 
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.MAX_SPEED_METERS_PER_SECOND);
 
     moduleFrontLeft.setDesiredState(swerveModuleStates[0]);
     moduleFrontRight.setDesiredState(swerveModuleStates[1]);

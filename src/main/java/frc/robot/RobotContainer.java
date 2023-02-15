@@ -6,7 +6,9 @@ package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.CommandMoveLift;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Lift;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -18,8 +20,9 @@ import edu.wpi.first.wpilibj.XboxController;
 public class RobotContainer {
     private final AutoManager autoManager;
     private static final Drivetrain drivetrain = new Drivetrain();
+    private final Lift lift = new Lift();
 
-    Joystick driverController = new Joystick(OIConstants.kDriverControllerPort);
+    Joystick driverController = new Joystick(OIConstants.DRIVER_CONTROLLER_PORT);
     boolean isFieldRelativePressed = false;
     //XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
@@ -30,6 +33,7 @@ public class RobotContainer {
         configureButtonBindings();
 
         autoManager = AutoManager.getInstance();
+        lift.resetEncoders();
 
         drivetrain.setDefaultCommand(
             new RunCommand(() -> drivetrain.drive(
@@ -42,7 +46,7 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
         // Trigger for brake
-        new JoystickButton(driverController, OIConstants.kJoystickTrigger)
+        new JoystickButton(driverController, OIConstants.JOYSTICK_TRIGGER)
             .whileTrue(new RunCommand(() -> drivetrain.setX(), drivetrain));
 
         new JoystickButton(driverController, 8)
@@ -55,6 +59,9 @@ public class RobotContainer {
                 }
                 
             }, drivetrain));
+            
+        new JoystickButton(driverController, 3)
+            .whileTrue(new CommandMoveLift(lift));
 
         // Hat controls 
         new POVButton(driverController, 90)
