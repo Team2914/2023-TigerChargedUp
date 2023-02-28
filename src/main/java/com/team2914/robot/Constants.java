@@ -2,8 +2,9 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot;
+package com.team2914.robot;
 
+import com.pathplanner.lib.auto.PIDConstants;
 import com.revrobotics.CANSparkMax.IdleMode;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -109,9 +110,9 @@ public final class Constants {
     public static final double MAX_ANGULAR_SPEED_RADS_PER_SECOND = Math.PI;
     public static final double MAX_ANGULAR_SPEED_RADS_PER_SEC_SQUARED = Math.PI;
 
-    public static final double kPXController = 1;
-    public static final double kPYController = 1;
-    public static final double kPThetaController = 1;
+    public static PIDConstants PID_X_CONSTANTS = new PIDConstants(2.22, 0, 0);
+    public static PIDConstants PID_Y_CONSTANTS = new PIDConstants(2.22, 0, 0);
+    public static PIDConstants PID_ROT_CONSTANTS = new PIDConstants(5, 0, 0);
 
     // Constraint for the motion profiled robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
@@ -140,11 +141,12 @@ public final class Constants {
 
   public static final class LiftConstants {
     public static final int LIFT_MOTOR_CAN_ID = 10;
-    public static final double LIFT_P = 1;
+    public static final double LIFT_P = 0.05;
     public static final double LIFT_I = 0;
     public static final double LIFT_D = 0;
     public static final int LIFT_MIN_OUTPUT = -1;
     public static final int LIFT_MAX_OUTPUT = 1;
-    
+    public static final double SHOULDER_LENGTH = 200;
+    public static final double ELBOW_LENGTH = 200;
   }
 }

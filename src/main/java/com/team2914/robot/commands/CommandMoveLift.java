@@ -1,13 +1,15 @@
-package frc.robot.commands;
+package com.team2914.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Lift;
+import com.team2914.robot.subsystems.Lift;
 
 public class CommandMoveLift extends CommandBase {
     private final Lift lift;
+    private double pos;
 
-    public CommandMoveLift(Lift lift) {
+    public CommandMoveLift(double pos, Lift lift) {
         this.lift = lift;
+        this.pos = pos;
 
         addRequirements(lift);
     }
@@ -19,6 +21,7 @@ public class CommandMoveLift extends CommandBase {
 
     @Override
     public void execute() {
-        lift.setLiftPosition(Math.PI / 4.0);
+        lift.setMotorPosition(pos);
     }
+
 }

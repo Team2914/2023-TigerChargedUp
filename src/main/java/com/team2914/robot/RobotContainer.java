@@ -2,13 +2,13 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot;
+package com.team2914.robot;
 
 import edu.wpi.first.math.MathUtil;
-import frc.robot.Constants.OIConstants;
-import frc.robot.commands.CommandMoveLift;
-import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.Lift;
+import com.team2914.robot.Constants.OIConstants;
+import com.team2914.robot.commands.CommandMoveLift;
+import com.team2914.robot.subsystems.Drivetrain;
+import com.team2914.robot.subsystems.Lift;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -19,21 +19,25 @@ import edu.wpi.first.wpilibj.XboxController;
 
 public class RobotContainer {
     private final AutoManager autoManager;
-    private static final Drivetrain drivetrain = new Drivetrain();
-    private final Lift lift = new Lift();
+    private final Drivetrain drivetrain;
+    private final Lift lift;
 
-    Joystick driverController = new Joystick(OIConstants.DRIVER_CONTROLLER_PORT);
+    private final Joystick driverController;
+    private final Joystick operatorController;
     boolean isFieldRelativePressed = false;
-    //XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
-    /**
-    * The container for the robot. Contains subsystems, OI devices, and commands.
-    */
+    // The container for the robot. Contains subsystems, OI devices, and commands.
     public RobotContainer() {
         configureButtonBindings();
 
         autoManager = AutoManager.getInstance();
+        drivetrain = Drivetrain.getInstance();
+        lift = Lift.getInstance();
+        
         lift.resetEncoders();
+
+        driverController = new Joystick(OIConstants.DRIVER_CONTROLLER_PORT);
+        operatorController = new Joystick(OIConstants.OPERATOR_CONTROLLER_PORT);
 
         drivetrain.setDefaultCommand(
             new RunCommand(() -> drivetrain.drive(
@@ -41,6 +45,12 @@ public class RobotContainer {
                 MathUtil.applyDeadband(-driverController.getX(), 0.06),
                 MathUtil.applyDeadband(-driverController.getZ(), 0.06)),
                 drivetrain));
+
+        lift.setDefaultCommand(
+            new RunCommand(() -> lift.setArmTarget(
+                MathUtil.applyDeadband(-driverController.getY(), 0.06),
+                MathUtil.applyDeadband(-driverController.getX(), 0.06)),
+                lift));
 
     }
 
@@ -59,9 +69,6 @@ public class RobotContainer {
                 }
                 
             }, drivetrain));
-            
-        new JoystickButton(driverController, 3)
-            .whileTrue(new CommandMoveLift(lift));
 
         // Hat controls 
         new POVButton(driverController, 90)
@@ -88,10 +95,6 @@ public class RobotContainer {
                 0, 
                 0), 
                 drivetrain));
-    }
-
-    public static Drivetrain getDrivetrain() {
-        return drivetrain;
     }
 
     public Command getAutonomousCommand() {

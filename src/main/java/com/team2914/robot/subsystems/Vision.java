@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package com.team2914.robot.subsystems;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -12,14 +12,15 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
-import frc.robot.Constants.OIConstants;
-import frc.robot.Constants.VisionConstants;
+import com.team2914.robot.Constants.OIConstants;
+import com.team2914.robot.Constants.VisionConstants;
 
-public class PhotonAprilTags {
+public class Vision {
+    private static Vision instance = null;
     private final PhotonCamera camera;
     private final PhotonPoseEstimator poseEstimator;
 
-    public PhotonAprilTags() {
+    private Vision() {
         camera = new PhotonCamera(OIConstants.PHOTON_CAMERA_NAME);
         AprilTagFieldLayout fieldLayout = null;
         
@@ -33,6 +34,14 @@ public class PhotonAprilTags {
                                                 PoseStrategy.CLOSEST_TO_REFERENCE_POSE, 
                                                 camera, 
                                                 VisionConstants.ROBOT_TO_CAM);
+    }
+
+    public static Vision getInstance() {
+        if (instance == null) {
+            instance = new Vision();
+        }
+
+        return instance;
     }
 
     public Optional<EstimatedRobotPose> getEstimatedRobotPose(Pose2d previousEstimatedPose) {

@@ -2,14 +2,13 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
-
-
+package com.team2914.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
-import frc.robot.utils.BNO055;
-import frc.robot.utils.BNO055.opmode_t;
-import frc.robot.utils.BNO055.vector_type_t;
+import com.team2914.lib.gyro.BNO055;
+import com.team2914.lib.gyro.BNO055.opmode_t;
+import com.team2914.lib.gyro.BNO055.vector_type_t;
+
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,15 +16,15 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants.DriveConstants;
+import com.team2914.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.EstimatedRobotPose;
 import java.util.Optional;
 
 public class Drivetrain extends SubsystemBase {
+  private static Drivetrain instance = null;
   // Create MAXSwerveModules
   private final MAXSwerveModule moduleFrontLeft = new MAXSwerveModule(
       DriveConstants.FRONT_LEFT_DRIVE_CAN_ID,
@@ -49,15 +48,16 @@ public class Drivetrain extends SubsystemBase {
 
   //private final AHRS gyro;
   private final BNO055 gyro;
-  private final PhotonAprilTags photon = new PhotonAprilTags();
+  private final Vision vision;
   private Field2d field = new Field2d();
   SwerveDrivePoseEstimator poseEstimator;
   boolean isFieldRelative = false;
 
   /** Creates a new DriveSubsystem. */
-  public Drivetrain() {
+  private Drivetrain() {
     //gyro = new AHRS(I2C.Port.kMXP);
     gyro = BNO055.getInstance(opmode_t.OPERATION_MODE_IMUPLUS, vector_type_t.VECTOR_EULER);
+    vision = Vision.getInstance();
 
     poseEstimator = new SwerveDrivePoseEstimator(
       DriveConstants.DRIVE_KINEMATICS,
@@ -70,6 +70,14 @@ public class Drivetrain extends SubsystemBase {
       },
       new Pose2d());
       SmartDashboard.putData("Field", field);
+  }
+
+  public static Drivetrain getInstance() {
+    if (instance == null) {
+      instance = new Drivetrain();
+    }
+
+    return instance;
   }
 
   @Override
@@ -90,7 +98,7 @@ public class Drivetrain extends SubsystemBase {
 
     field.setRobotPose(poseEstimator.getEstimatedPosition());    
 
-    Optional<EstimatedRobotPose> camResult = photon.getEstimatedRobotPose(poseEstimator.getEstimatedPosition());
+    Optional<EstimatedRobotPose> camResult = vision.getEstimatedRobotPose(poseEstimator.getEstimatedPosition());
 
     if (!camResult.isPresent()) return;
 
@@ -103,14 +111,7 @@ public class Drivetrain extends SubsystemBase {
     return poseEstimator.getEstimatedPosition();
   }
 
-  /**
-   * Method to drive the robot using joystick info.
-   *
-   * @param xSpeed        Speed of the robot in the x direction (forward).
-   * @param ySpeed        Speed of the robot in the y direction (sideways).
-   * @param rot           Angular rate of the robot.
-   * 
-   */
+
   public void drive(double xSpeed, double ySpeed, double rot) {
     // Adjust input based on max speed
     xSpeed *= DriveConstants.MAX_SPEED_METERS_PER_SECOND;

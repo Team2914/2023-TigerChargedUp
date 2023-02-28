@@ -1,4 +1,4 @@
-package frc.robot;
+package com.team2914.robot;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,8 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
-import frc.robot.subsystems.Drivetrain;
+import com.team2914.robot.subsystems.Drivetrain;
+import com.team2914.robot.utils.SwerveAutoBuilderEx;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -25,9 +26,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
-import frc.robot.Constants.AutoConstants;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.commands.SwerveAutoBuilderEx;
+import com.team2914.robot.Constants.AutoConstants;
+import com.team2914.robot.Constants.DriveConstants;
 
 /* AutoManager singleton. It manages autonomous opmodes. */
 public class AutoManager {
@@ -38,14 +38,14 @@ public class AutoManager {
 
     private AutoManager() {
         eventMap = buildEventMap();
-        Drivetrain drivetrain = RobotContainer.getDrivetrain();
+        Drivetrain drivetrain = Drivetrain.getInstance();
         autoBuilder = new SwerveAutoBuilderEx(
             drivetrain::getPose, 
             drivetrain::resetPose,
             DriveConstants.DRIVE_KINEMATICS, 
-            new PIDConstants(2.22, 0, 0),
-            new PIDConstants(2.22, 0, 0),
-            new PIDConstants(5, 0, 0),
+            AutoConstants.PID_X_CONSTANTS,
+            AutoConstants.PID_Y_CONSTANTS,
+            AutoConstants.PID_ROT_CONSTANTS,
             drivetrain::setModuleStates, 
             eventMap, 
             false,
@@ -54,7 +54,6 @@ public class AutoManager {
         autoChooser = new SendableChooser<>();
         autoChooser.setDefaultOption("None", Commands.none());
         autoChooser.addOption("PIDTEST", PIDTEST());
-        autoChooser.addOption("PIDLINE", PIDLINE());
         
         SmartDashboard.putData("Autonomous OpMode", autoChooser);
     }
@@ -69,46 +68,16 @@ public class AutoManager {
     
     private CommandBase PIDTEST() {
         return autoBuilder.fullAuto(
-            PathPlanner.loadPath("PIDTEST", new PathConstraints(AutoConstants.MAX_SPEED_METERS_PER_SECOND, AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED))
+            PathPlanner.loadPath("PIDTEST", new PathConstraints(
+                                                        AutoConstants.MAX_SPEED_METERS_PER_SECOND, 
+                                                        AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED))
         );
-    }
-
-    private CommandBase PIDLINE() {
-        TrajectoryConfig config = new TrajectoryConfig(
-            AutoConstants.MAX_SPEED_METERS_PER_SECOND, 
-            AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED)
-            .setKinematics(DriveConstants.DRIVE_KINEMATICS);
-
-        Trajectory traj = TrajectoryGenerator.generateTrajectory(
-            new Pose2d(0, 0, new Rotation2d(0)), 
-            List.of(new Translation2d(0, 0)), 
-            new Pose2d(2, 0, new Rotation2d(0)), config);
-
-        ProfiledPIDController thetaController = new ProfiledPIDController(
-            AutoConstants.kPThetaController, 0, 0, 
-            AutoConstants.kThetaControllerConstraints);
-        thetaController.enableContinuousInput(-Math.PI, Math.PI);
-
-        Drivetrain drivetrain = RobotContainer.getDrivetrain();
-
-        SwerveControllerCommand cmd = new SwerveControllerCommand(
-            traj, 
-            drivetrain::getPose, 
-            DriveConstants.DRIVE_KINEMATICS, 
-            new PIDController(AutoConstants.kPXController, 0, 0),
-            new PIDController(AutoConstants.kPYController, 0, 0),
-            thetaController,
-            drivetrain::setModuleStates,
-            drivetrain);
-
-        drivetrain.resetPose(traj.getInitialPose());
-        return cmd;
     }
 
     private HashMap<String, Command> buildEventMap() {
         return new HashMap<>(Map.ofEntries(
-            Map.entry("event1", Commands.print("balls")),
-            Map.entry("event2", Commands.print("another balls"))
+            Map.entry("extendHigh", Commands.print("balls")),
+            Map.entry("dropCone", Commands.print("another balls"))
         ));
     }
 

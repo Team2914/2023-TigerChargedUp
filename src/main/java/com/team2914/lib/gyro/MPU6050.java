@@ -1,4 +1,4 @@
-package frc.robot.utils;
+package com.team2914.lib.gyro;
 
 import edu.wpi.first.wpilibj.I2C;
 
