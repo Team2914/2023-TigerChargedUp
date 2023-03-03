@@ -155,4 +155,9 @@ public final class Constants {
     public static final double ELBOW_GEAR_RATIO = 1.0 / 64.0;
     public static final double ELBOW_SPROCKET_RATIO = 1.0;
   }
+
+  public static final class ClawConstants {
+    public static final int ROTATE_TALON_CHANNEL = 0;
+    public static final int INTAKE_TALON_CHANNEL = 0;
+  }
 }

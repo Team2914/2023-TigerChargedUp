@@ -4,6 +4,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -67,7 +68,8 @@ public class Lift extends SubsystemBase {
         shoulderFollowMotor.follow(shoulderMotor);
         elbowFollowMotor.follow(elbowMotor);
 
-        moveArm(2, 2);
+        resetArm();
+        //moveArm(2, 2);
     }
 
     public static Lift getInstance() {
@@ -80,7 +82,10 @@ public class Lift extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Lift encoder position", shoulderMotorEncoder.getPosition());
+        SmartDashboard.putNumber("Shoulder joint encoder position", shoulderMotorEncoder.getPosition());
+        SmartDashboard.putNumber("Elbow joint encoder position", elbowMotorEncoder.getPosition());
+        SmartDashboard.putNumber("Shoulder angle", shoulderAngle);
+        SmartDashboard.putNumber("Elbow angle", shoulderAngle + elbowAngle);
         SmartDashboard.putNumber("Arm X", armX);
         SmartDashboard.putNumber("Arm Y", armY);
     }
@@ -105,21 +110,39 @@ public class Lift extends SubsystemBase {
 
         shoulderMotorPID.setReference(
             MathUtil.degreesToEncoders(
-                Math.toRadians(shoulderAngle), 
+                shoulderAngle, 
                 LiftConstants.SHOULDER_GEAR_RATIO * LiftConstants.SHOULDER_SPROCKET_RATIO, 
                 42), 
             CANSparkMax.ControlType.kPosition);
 
         shoulderMotorPID.setReference(
             MathUtil.degreesToEncoders(
-                Math.toRadians(shoulderAngle + elbowAngle), 
+                shoulderAngle + elbowAngle, 
                 LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO, 
                 42), 
             CANSparkMax.ControlType.kPosition);
     }
 
     public void resetEncoders() {
-        shoulderMotorEncoder.setPosition(0);
-        shoulderMotorPID.setReference(0, CANSparkMax.ControlType.kPosition);
+        
+    }
+
+    public void resetArm() {
+        shoulderAngle = 0;
+        elbowAngle = 0;
+        shoulderMotorEncoder.setPosition(
+            MathUtil.degreesToEncoders(
+                shoulderAngle, 
+                LiftConstants.SHOULDER_GEAR_RATIO * LiftConstants.SHOULDER_SPROCKET_RATIO,
+                42)
+            );
+        elbowMotorEncoder.setPosition(
+            MathUtil.degreesToEncoders(
+                shoulderAngle, 
+                LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO,
+                42)
+            );
+        shoulderMotorPID.setReference(shoulderMotorEncoder.getPosition(), ControlType.kPosition);
+        elbowMotorPID.setReference(elbowMotorEncoder.getPosition(), ControlType.kPosition);
     }
 }

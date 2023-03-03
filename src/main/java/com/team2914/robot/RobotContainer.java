@@ -9,18 +9,19 @@ import com.team2914.robot.Constants.OIConstants;
 import com.team2914.robot.commands.CommandMoveLift;
 import com.team2914.robot.subsystems.Drivetrain;
 import com.team2914.robot.subsystems.Lift;
+import com.team2914.robot.subsystems.Claw;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
 
 public class RobotContainer {
     private final AutoManager autoManager;
     private final Drivetrain drivetrain;
     private final Lift lift;
+    private final Claw claw;
 
     private final Joystick driverController;
     private final Joystick operatorController;
@@ -33,8 +34,7 @@ public class RobotContainer {
         autoManager = AutoManager.getInstance();
         drivetrain = Drivetrain.getInstance();
         lift = Lift.getInstance();
-        
-        lift.resetEncoders();
+        claw = Claw.getInstance();
 
         driverController = new Joystick(OIConstants.DRIVER_CONTROLLER_PORT);
         operatorController = new Joystick(OIConstants.OPERATOR_CONTROLLER_PORT);
@@ -55,6 +55,7 @@ public class RobotContainer {
     }
 
     private void configureButtonBindings() {
+        // DRIVER CONTROLS
         // Trigger for brake
         new JoystickButton(driverController, OIConstants.JOYSTICK_TRIGGER)
             .whileTrue(new RunCommand(() -> drivetrain.setX(), drivetrain));
@@ -95,6 +96,11 @@ public class RobotContainer {
                 0, 
                 0), 
                 drivetrain));
+
+        // OPERATOR CONTROLS
+        new JoystickButton(operatorController, 1)
+            .whileTrue(new RunCommand(() -> claw.setIntakeSpeed(0.5), claw))
+            .whileFalse(new RunCommand(() -> claw.setIntakeSpeed(0), claw));
     }
 
     public Command getAutonomousCommand() {
