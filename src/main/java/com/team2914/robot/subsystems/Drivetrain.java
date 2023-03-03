@@ -52,6 +52,7 @@ public class Drivetrain extends SubsystemBase {
   private Field2d field = new Field2d();
   SwerveDrivePoseEstimator poseEstimator;
   boolean isFieldRelative = false;
+  FieldLocation currentLocation;
 
   /** Creates a new DriveSubsystem. */
   private Drivetrain() {
@@ -96,7 +97,10 @@ public class Drivetrain extends SubsystemBase {
             moduleRearRight.getPosition()
         });
 
-    field.setRobotPose(poseEstimator.getEstimatedPosition());    
+    field.setRobotPose(poseEstimator.getEstimatedPosition()); 
+    
+    double poseX = poseEstimator.getEstimatedPosition().getX();
+    double poseY = poseEstimator.getEstimatedPosition().getY();
 
     Optional<EstimatedRobotPose> camResult = vision.getEstimatedRobotPose(poseEstimator.getEstimatedPosition());
 
@@ -195,6 +199,17 @@ public class Drivetrain extends SubsystemBase {
 
   public boolean isFieldRelative() {
     return isFieldRelative;
+  }
+
+  public enum FieldLocation {
+    GRID_1,
+    GRID_2,
+    GRID_3,
+    GRID_4,
+    GRID_5,
+    GRID_6,
+    SUBSTATION_1,
+    SUBSTATION_2
   }
 
 }

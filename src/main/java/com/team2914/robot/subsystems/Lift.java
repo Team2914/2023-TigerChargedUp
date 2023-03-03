@@ -10,12 +10,20 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.team2914.robot.Constants.LiftConstants;
+import com.team2914.robot.utils.MathUtil;
 
 public class Lift extends SubsystemBase {
     private static Lift instance = null;
-    private final CANSparkMax motor;
-    private final RelativeEncoder motorEncoder;
-    private final SparkMaxPIDController motorPIDController;
+    private final CANSparkMax shoulderMotor;
+    private final RelativeEncoder shoulderMotorEncoder;
+    private final SparkMaxPIDController shoulderMotorPID;
+    private final CANSparkMax elbowMotor;
+    private final RelativeEncoder elbowMotorEncoder;
+    private final SparkMaxPIDController elbowMotorPID;
+    private final CANSparkMax shoulderFollowMotor;
+    private final RelativeEncoder shoulderFollowMotorEncoder;
+    private final CANSparkMax elbowFollowMotor;
+    private final RelativeEncoder elbowFollowMotorEncoder;
     
     private double armX = 0;
     private double armY = 0;
@@ -23,21 +31,43 @@ public class Lift extends SubsystemBase {
     private double elbowAngle = 0;
 
     private Lift() {
-        motor = new CANSparkMax(LiftConstants.LIFT_MOTOR_CAN_ID, MotorType.kBrushless);
-        motor.restoreFactoryDefaults();
+        shoulderMotor = new CANSparkMax(LiftConstants.SHOULDER_MOTOR_CAN_ID, MotorType.kBrushless);
+        shoulderMotor.restoreFactoryDefaults();
+        elbowMotor = new CANSparkMax(LiftConstants.ELBOW_MOTOR_CAN_ID, MotorType.kBrushless);
+        elbowMotor.restoreFactoryDefaults();
+        shoulderFollowMotor = new CANSparkMax(LiftConstants.SHOULDER_FOLLOW_MOTOR_CAN_ID, MotorType.kBrushless);
+        shoulderFollowMotor.restoreFactoryDefaults();
+        elbowFollowMotor = new CANSparkMax(LiftConstants.ELBOW_FOLLOW_MOTOR_CAN_ID, MotorType.kBrushless);
+        elbowFollowMotor.restoreFactoryDefaults();
 
-        motorEncoder = motor.getEncoder();
-        motorEncoder.setPositionConversionFactor(42);
-        motorPIDController = motor.getPIDController();
-        motorPIDController.setFeedbackDevice(motorEncoder);
-        motorPIDController.setP(LiftConstants.LIFT_P);
-        motorPIDController.setI(LiftConstants.LIFT_I);
-        motorPIDController.setD(LiftConstants.LIFT_D);
-        motorPIDController.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
+        shoulderMotorEncoder = shoulderMotor.getEncoder();
+        shoulderMotorEncoder.setPositionConversionFactor(42);
+        shoulderMotorPID = shoulderMotor.getPIDController();
+        shoulderMotorPID.setFeedbackDevice(shoulderMotorEncoder);
+        shoulderMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        shoulderMotorPID.setI(LiftConstants.SHOULDER_PID.kP);
+        shoulderMotorPID.setD(LiftConstants.SHOULDER_PID.kP);
+        shoulderMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
+        shoulderMotor.setIdleMode(IdleMode.kBrake);
+        
+        elbowMotorEncoder = elbowMotor.getEncoder();
+        elbowMotorEncoder.setPositionConversionFactor(42);
+        elbowMotorPID = elbowMotor.getPIDController();
+        elbowMotorPID.setFeedbackDevice(elbowMotorEncoder);
+        elbowMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        elbowMotorPID.setI(LiftConstants.SHOULDER_PID.kP);
+        elbowMotorPID.setD(LiftConstants.SHOULDER_PID.kP);
+        elbowMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
+        elbowMotor.setIdleMode(IdleMode.kBrake);
 
-        motor.setIdleMode(IdleMode.kBrake);
+        shoulderFollowMotorEncoder = shoulderFollowMotor.getEncoder();
+        shoulderFollowMotorEncoder.setPositionConversionFactor(42);
+        elbowFollowMotorEncoder = elbowFollowMotor.getEncoder();
+        elbowFollowMotorEncoder.setPositionConversionFactor(42);
+        shoulderFollowMotor.follow(shoulderMotor);
+        elbowFollowMotor.follow(elbowMotor);
 
-        setArmTarget(2, 2);
+        moveArm(2, 2);
     }
 
     public static Lift getInstance() {
@@ -50,18 +80,18 @@ public class Lift extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Lift encoder position", motorEncoder.getPosition());
+        SmartDashboard.putNumber("Lift encoder position", shoulderMotorEncoder.getPosition());
         SmartDashboard.putNumber("Arm X", armX);
         SmartDashboard.putNumber("Arm Y", armY);
     }
 
     public void setMotorPosition(double position) {
-        motorPIDController.setReference(position, CANSparkMax.ControlType.kPosition);
+        shoulderMotorPID.setReference(position, CANSparkMax.ControlType.kPosition);
     }
 
-    public void setArmTarget(double x, double y) {
-        armX += x * 10;
-        armY += y * 10;
+    public void moveArm(double dx, double dy) {
+        armX += dx * 10;
+        armY += dy * 10;
 
         double shoulderLength2 = LiftConstants.SHOULDER_LENGTH * LiftConstants.SHOULDER_LENGTH;
         double elbowLength2 = LiftConstants.ELBOW_LENGTH * LiftConstants.ELBOW_LENGTH;
@@ -72,10 +102,24 @@ public class Lift extends SubsystemBase {
         double a1 = LiftConstants.ELBOW_LENGTH * Math.sin(elbowAngle);
         double b1 = LiftConstants.SHOULDER_LENGTH + LiftConstants.ELBOW_LENGTH * Math.cos(elbowAngle);
         shoulderAngle = Math.atan(armY / armX) - Math.atan(a1 / b1);
+
+        shoulderMotorPID.setReference(
+            MathUtil.degreesToEncoders(
+                Math.toRadians(shoulderAngle), 
+                LiftConstants.SHOULDER_GEAR_RATIO * LiftConstants.SHOULDER_SPROCKET_RATIO, 
+                42), 
+            CANSparkMax.ControlType.kPosition);
+
+        shoulderMotorPID.setReference(
+            MathUtil.degreesToEncoders(
+                Math.toRadians(shoulderAngle + elbowAngle), 
+                LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO, 
+                42), 
+            CANSparkMax.ControlType.kPosition);
     }
 
     public void resetEncoders() {
-        motorEncoder.setPosition(0);
-        motorPIDController.setReference(0, CANSparkMax.ControlType.kPosition);
+        shoulderMotorEncoder.setPosition(0);
+        shoulderMotorPID.setReference(0, CANSparkMax.ControlType.kPosition);
     }
 }

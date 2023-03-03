@@ -3,11 +3,23 @@ package com.team2914.lib.pathfinder;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerEx;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPoint;
+import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.math.controller.PIDController;
 
+import com.team2914.robot.Constants.AutoConstants;
+import com.team2914.robot.subsystems.Drivetrain;
 import com.team2914.robot.utils.MiscUtil;
 
 public class Pathfinder {
@@ -189,7 +201,35 @@ public class Pathfinder {
         return null;
     }
 
-    public Command generatePathCommand(Translation2d start, Translation2d end) {
-        return null;
+    public Command generatePathCommand(Pose2d start, Pose2d end) {
+        List<Node> nodes = theta(start.getTranslation(), end.getTranslation());
+        List<PathPoint> points = new ArrayList<>();
+        if (nodes == null) {
+            return Commands.none();
+        }
+
+        for (int i = 0; i < nodes.size(); i++) {
+            if (i < nodes.size() - 1) {
+                points.add(new PathPoint(nodes.get(i).getPos(), new Rotation2d(), start.getRotation()));
+            } else {
+                points.add(new PathPoint(nodes.get(i).getPos(), new Rotation2d(), end.getRotation()));
+            }
+        }
+
+        PathPlannerTrajectory traj = PathPlannerEx.tigerGeneratePath(
+            new PathConstraints(
+                AutoConstants.MAX_SPEED_METERS_PER_SECOND, 
+                AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED), 
+            false, 
+            points);
+
+        return new PPSwerveControllerCommand(
+            traj, 
+            Drivetrain.getInstance()::getPose, 
+            MiscUtil.pidControllerFromConstants(AutoConstants.PID_X_CONSTANTS), 
+            MiscUtil.pidControllerFromConstants(AutoConstants.PID_Y_CONSTANTS), 
+            MiscUtil.pidControllerFromConstants(AutoConstants.PID_ROT_CONSTANTS), 
+            Drivetrain.getInstance()::setModuleStates, 
+            Drivetrain.getInstance());
     }
 }

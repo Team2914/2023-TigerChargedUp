@@ -2,6 +2,9 @@ package com.pathplanner.lib;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
 import com.pathplanner.lib.PathPlannerTrajectory.Waypoint;
 import edu.wpi.first.math.geometry.Translation2d;
 
@@ -13,6 +16,8 @@ public class PathPlannerEx extends PathPlanner {
             throw new IllegalArgumentException(
                 "Error generating trajectory.  List of points in trajectory must have at least two points.");
         }
+
+        Collections.reverse(points);
       
         List<Waypoint> waypoints = new ArrayList<>();
         for (int i = 0; i < points.size(); i++) {
@@ -24,28 +29,30 @@ public class PathPlannerEx extends PathPlanner {
             Translation2d nextControl = null;
             Rotation2d angle = p1.holonomicRotation;
 
+            if (p0 != null) {
+                angle = Rotation2d.fromRadians(
+                    Math.atan2(p1.position.getY() - p0.position.getY(), p1.position.getX() - p0.position.getX()));
+                prevControl = new Translation2d(
+                    p1.position.getX() - 0.75 * Math.cos(angle.getRadians()),
+                    p1.position.getY() - 0.75 * Math.sin(angle.getRadians())
+                );
+            }
+
             if (p2 != null) {
                 angle = Rotation2d.fromRadians(
                     Math.atan2(p2.position.getY() - p1.position.getY(), p2.position.getX() - p1.position.getX()));
-            }
+                nextControl = new Translation2d(
+                    p1.position.getX() + 0.75 * Math.cos(angle.getRadians()),
+                    p1.position.getY() + 0.75 * Math.sin(angle.getRadians())
+                );
 
-            if (p0 != null) {
-                prevControl = 
-                    p1.position.minus(
-                        new Translation2d(
-                            1.5 * Math.cos(angle.getRadians()), 
-                            1.5 * Math.sin(angle.getRadians())
-                    )
+                if (p0 != null) {
+                    prevControl = new Translation2d(
+                    p1.position.getX() - 0.75 * Math.cos(angle.getRadians()),
+                    p1.position.getY() - 0.75 * Math.sin(angle.getRadians())
                 );
+                }
             }
-            
-            nextControl = 
-                p1.position.plus(
-                    new Translation2d(
-                        1.5 * Math.cos(angle.getRadians()),
-                        1.5 * Math.sin(angle.getRadians())
-                    )
-                );
 
             waypoints.add(
                 new Waypoint(

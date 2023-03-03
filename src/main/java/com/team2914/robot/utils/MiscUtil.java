@@ -6,6 +6,9 @@ import java.util.List;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPoint;
+import com.pathplanner.lib.auto.PIDConstants;
+
+import edu.wpi.first.math.controller.PIDController;
 
 public class MiscUtil {
     public static List<Integer[]> bresenham(int x0, int y0, int x1, int y1) {
@@ -39,4 +42,8 @@ public class MiscUtil {
         return out;
     }
 
+    // Taken from BaseAutoBuilder - PathPlannerLib
+    public static PIDController pidControllerFromConstants(PIDConstants constants) {
+        return new PIDController(constants.kP, constants.kI, constants.kD, constants.period);
+    }
 }

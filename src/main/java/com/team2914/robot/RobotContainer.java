@@ -47,7 +47,7 @@ public class RobotContainer {
                 drivetrain));
 
         lift.setDefaultCommand(
-            new RunCommand(() -> lift.setArmTarget(
+            new RunCommand(() -> lift.moveArm(
                 MathUtil.applyDeadband(-driverController.getY(), 0.06),
                 MathUtil.applyDeadband(-driverController.getX(), 0.06)),
                 lift));

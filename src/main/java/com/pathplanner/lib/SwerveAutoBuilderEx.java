@@ -1,4 +1,4 @@
-package com.team2914.robot.utils;
+package com.pathplanner.lib;
 
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.auto.PIDConstants;
@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/** Extended version of SwerveAutoBuilder by TigerPride */
 public class SwerveAutoBuilderEx extends BaseAutoBuilder {
   private final SwerveDriveKinematics kinematics;
   private final PIDConstants translationXConstants;

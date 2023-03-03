@@ -11,6 +11,8 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.team2914.robot.Constants.OIConstants;
 import com.team2914.robot.Constants.VisionConstants;
@@ -47,5 +49,10 @@ public class Vision {
     public Optional<EstimatedRobotPose> getEstimatedRobotPose(Pose2d previousEstimatedPose) {
         poseEstimator.setReferencePose(previousEstimatedPose);
         return poseEstimator.update();
+
+    }
+
+    public PhotonTrackedTarget getBestTarget() {
+        return camera.getLatestResult().getBestTarget();
     }
 }
