@@ -109,14 +109,14 @@ public class Lift extends SubsystemBase {
         shoulderAngle = Math.atan(armY / armX) - Math.atan(a1 / b1);
 
         shoulderMotorPID.setReference(
-            MathUtil.degreesToEncoders(
+            MathUtil.radToEncoders(
                 shoulderAngle, 
                 LiftConstants.SHOULDER_GEAR_RATIO * LiftConstants.SHOULDER_SPROCKET_RATIO, 
                 42), 
             CANSparkMax.ControlType.kPosition);
 
         shoulderMotorPID.setReference(
-            MathUtil.degreesToEncoders(
+            MathUtil.radToEncoders(
                 shoulderAngle + elbowAngle, 
                 LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO, 
                 42), 
@@ -131,13 +131,13 @@ public class Lift extends SubsystemBase {
         shoulderAngle = 0;
         elbowAngle = 0;
         shoulderMotorEncoder.setPosition(
-            MathUtil.degreesToEncoders(
+            MathUtil.radToEncoders(
                 shoulderAngle, 
                 LiftConstants.SHOULDER_GEAR_RATIO * LiftConstants.SHOULDER_SPROCKET_RATIO,
                 42)
             );
         elbowMotorEncoder.setPosition(
-            MathUtil.degreesToEncoders(
+            MathUtil.radToEncoders(
                 shoulderAngle, 
                 LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO,
                 42)
