@@ -114,9 +114,12 @@ public final class Constants {
     public static PIDConstants PID_Y_CONSTANTS = new PIDConstants(2.22, 0, 0);
     public static PIDConstants PID_ROT_CONSTANTS = new PIDConstants(5, 0, 0);
 
-    // Constraint for the motion profiled robot angle controller
-    public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
-        MAX_ANGULAR_SPEED_RADS_PER_SECOND, MAX_ANGULAR_SPEED_RADS_PER_SEC_SQUARED);
+    public static Translation2d BLU_GRID1_BB_TOP_LEFT = new Translation2d(1.40, 1.85);
+    public static Translation2d BLU_GRID1_BB_BTM_RITE = new Translation2d(2.5, 0);
+    public static Translation2d BLU_GRID2_BB_TOP_LEFT = new Translation2d(1.40, 3.55);
+    public static Translation2d BLU_GRID2_BB_BTM_RITE = new Translation2d(2.5, 1.85);
+    public static Translation2d BLU_GRID3_BB_TOP_LEFT = new Translation2d(1.40, 5.5);
+    public static Translation2d BLU_GRID3_BB_BTM_RITE = new Translation2d(2.5, 3.55);
   }
 
   public static final class NeoMotorConstants {
@@ -157,7 +160,7 @@ public final class Constants {
   }
 
   public static final class ClawConstants {
-    public static final int ROTATE_TALON_CHANNEL = 0;
-    public static final int INTAKE_TALON_CHANNEL = 0;
+    public static final int ROTATE_CAN_ID = 0;
+    public static final int INTAKE_CAN_ID = 0;
   }
 }

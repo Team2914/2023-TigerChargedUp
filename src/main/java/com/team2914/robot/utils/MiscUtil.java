@@ -9,6 +9,7 @@ import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.auto.PIDConstants;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Translation2d;
 
 public class MiscUtil {
     public static List<Integer[]> bresenham(int x0, int y0, int x1, int y1) {
@@ -45,5 +46,9 @@ public class MiscUtil {
     // Taken from BaseAutoBuilder - PathPlannerLib
     public static PIDController pidControllerFromConstants(PIDConstants constants) {
         return new PIDController(constants.kP, constants.kI, constants.kD, constants.period);
+    }
+
+    public static boolean isInsideBoundingBox(Translation2d p, Translation2d topLeft, Translation2d btmRight) {
+        return (topLeft.getX() <= p.getX() && p.getX() <= btmRight.getX() && topLeft.getY() >= p.getY() && p.getY() >= btmRight.getY());
     }
 }

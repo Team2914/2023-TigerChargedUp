@@ -25,8 +25,8 @@ public class CommandAlignScore extends CommandBase {
 
     @Override 
     public void execute() {
-        Vision photon = Vision.getInstance();
-        PhotonTrackedTarget target = photon.getBestTarget();
+        Vision vision = Vision.getInstance();
+        PhotonTrackedTarget target = vision.getBestTarget();
         if (target == null) return;
 
         PIDController rotController = MiscUtil.pidControllerFromConstants(AutoConstants.PID_ROT_CONSTANTS);

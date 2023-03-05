@@ -95,8 +95,8 @@ public class Lift extends SubsystemBase {
     }
 
     public void moveArm(double dx, double dy) {
-        armX += dx * 10;
-        armY += dy * 10;
+        armX += dx * 2;
+        armY += dy * 2;
 
         double shoulderLength2 = LiftConstants.SHOULDER_LENGTH * LiftConstants.SHOULDER_LENGTH;
         double elbowLength2 = LiftConstants.ELBOW_LENGTH * LiftConstants.ELBOW_LENGTH;
@@ -115,7 +115,7 @@ public class Lift extends SubsystemBase {
                 42), 
             CANSparkMax.ControlType.kPosition);
 
-        shoulderMotorPID.setReference(
+        elbowMotorPID.setReference(
             MathUtil.radToEncoders(
                 shoulderAngle + elbowAngle, 
                 LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO, 
@@ -128,8 +128,13 @@ public class Lift extends SubsystemBase {
     }
 
     public void resetArm() {
+        // UPDATE THESE VALUES MAXWELL
+        // UPDATE GEAR RATIOS AND SHIT IN CONSTANTS.JAVA
         shoulderAngle = 0;
         elbowAngle = 0;
+        // THESE AS WELL
+        armX = 0;
+        armY = 0;
         shoulderMotorEncoder.setPosition(
             MathUtil.radToEncoders(
                 shoulderAngle, 

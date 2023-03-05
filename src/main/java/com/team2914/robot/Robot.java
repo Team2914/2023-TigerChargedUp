@@ -6,6 +6,7 @@ package com.team2914.robot;
 
 import com.pathplanner.lib.server.PathPlannerServer;
 import com.team2914.robot.subsystems.Lift;
+import com.team2914.robot.subsystems.Vision;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -52,7 +53,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    Vision.getInstance().closeRoboflow();
+  }
 
   @Override
   public void disabledPeriodic() {}

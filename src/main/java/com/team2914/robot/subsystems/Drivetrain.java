@@ -12,13 +12,19 @@ import com.team2914.lib.gyro.BNO055.vector_type_t;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import com.team2914.robot.Constants.AutoConstants;
 import com.team2914.robot.Constants.DriveConstants;
+import com.team2914.robot.utils.MathUtil;
+import com.team2914.robot.utils.MiscUtil;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.EstimatedRobotPose;
 import java.util.Optional;
@@ -70,7 +76,9 @@ public class Drivetrain extends SubsystemBase {
           moduleRearRight.getPosition()
       },
       new Pose2d());
-      SmartDashboard.putData("Field", field);
+
+    SmartDashboard.putData("Field", field);
+    currentLocation = FieldLocation.OPEN;
   }
 
   public static Drivetrain getInstance() {
@@ -87,6 +95,7 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Heading", gyro.getRotation2d().getDegrees());
     SmartDashboard.putNumber("Pose X", poseEstimator.getEstimatedPosition().getX());
     SmartDashboard.putBoolean("Field relative", isFieldRelative);
+    SmartDashboard.putString("Current location", currentLocation.name());
 
     poseEstimator.update(
         gyro.getRotation2d(),
@@ -98,17 +107,25 @@ public class Drivetrain extends SubsystemBase {
         });
 
     field.setRobotPose(poseEstimator.getEstimatedPosition()); 
-    
-    double poseX = poseEstimator.getEstimatedPosition().getX();
-    double poseY = poseEstimator.getEstimatedPosition().getY();
 
     Optional<EstimatedRobotPose> camResult = vision.getEstimatedRobotPose(poseEstimator.getEstimatedPosition());
 
-    if (!camResult.isPresent()) return;
-
-    EstimatedRobotPose camPose = camResult.get();
-    poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
+    if (camResult.isPresent()) {
+      EstimatedRobotPose camPose = camResult.get();
+      poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
+    }
     
+    currentLocation = FieldLocation.OPEN;
+    Translation2d translation = poseEstimator.getEstimatedPosition().getTranslation();
+    if (MiscUtil.isInsideBoundingBox(translation, AutoConstants.BLU_GRID1_BB_TOP_LEFT, AutoConstants.BLU_GRID1_BB_BTM_RITE)) {
+      currentLocation = FieldLocation.BLU_GRID_1;
+    }
+    if (MiscUtil.isInsideBoundingBox(translation, AutoConstants.BLU_GRID2_BB_TOP_LEFT, AutoConstants.BLU_GRID2_BB_BTM_RITE)) {
+      currentLocation = FieldLocation.BLU_GRID_2;
+    }
+    if (MiscUtil.isInsideBoundingBox(translation, AutoConstants.BLU_GRID3_BB_TOP_LEFT, AutoConstants.BLU_GRID3_BB_BTM_RITE)) {
+      currentLocation = FieldLocation.BLU_GRID_3;
+    }
   }
 
   public Pose2d getPose() {
@@ -202,12 +219,13 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public enum FieldLocation {
-    GRID_1,
-    GRID_2,
-    GRID_3,
-    GRID_4,
-    GRID_5,
-    GRID_6,
+    OPEN,
+    BLU_GRID_1,
+    BLU_GRID_2,
+    BLU_GRID_3,
+    RED_GRID_1,
+    RED_GRID_2,
+    RED_GRID_3,
     SUBSTATION_1,
     SUBSTATION_2
   }
