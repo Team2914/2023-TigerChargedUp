@@ -128,11 +128,8 @@ public class Lift extends SubsystemBase {
     }
 
     public void resetArm() {
-        // UPDATE THESE VALUES MAXWELL
-        // UPDATE GEAR RATIOS AND SHIT IN CONSTANTS.JAVA
-        shoulderAngle = 0;
+        shoulderAngle = Math.PI / 3;
         elbowAngle = 0;
-        // THESE AS WELL
         armX = 0;
         armY = 0;
         shoulderMotorEncoder.setPosition(

@@ -29,7 +29,6 @@ public class RobotContainer {
 
     // The container for the robot. Contains subsystems, OI devices, and commands.
     public RobotContainer() {
-        configureButtonBindings();
 
         autoManager = AutoManager.getInstance();
         drivetrain = Drivetrain.getInstance();
@@ -39,6 +38,8 @@ public class RobotContainer {
         driverController = new Joystick(OIConstants.DRIVER_CONTROLLER_PORT);
         operatorController = new Joystick(OIConstants.OPERATOR_CONTROLLER_PORT);
 
+        
+        configureButtonBindings();
         drivetrain.setDefaultCommand(
             new RunCommand(() -> drivetrain.drive(
                 MathUtil.applyDeadband(-driverController.getY(), 0.06),
@@ -48,8 +49,8 @@ public class RobotContainer {
 
         lift.setDefaultCommand(
             new RunCommand(() -> lift.moveArm(
-                MathUtil.applyDeadband(-driverController.getY(), 0.06),
-                MathUtil.applyDeadband(-driverController.getX(), 0.06)),
+                MathUtil.applyDeadband(-operatorController.getY(), 0.06),
+                MathUtil.applyDeadband(-operatorController.getX(), 0.06)),
                 lift));
 
     }

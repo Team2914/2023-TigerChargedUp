@@ -143,24 +143,24 @@ public final class Constants {
   }
 
   public static final class LiftConstants {
-    public static final int SHOULDER_MOTOR_CAN_ID = 10;
-    public static final int ELBOW_MOTOR_CAN_ID = 10;
-    public static final int SHOULDER_FOLLOW_MOTOR_CAN_ID = 10;
+    public static final int SHOULDER_MOTOR_CAN_ID = 13;
+    public static final int ELBOW_MOTOR_CAN_ID = 11;
+    public static final int SHOULDER_FOLLOW_MOTOR_CAN_ID = 12;
     public static final int ELBOW_FOLLOW_MOTOR_CAN_ID = 10;
-    public static final PIDConstants SHOULDER_PID = new PIDConstants(0.05, 0, 0);
-    public static final PIDConstants ELBOW_PID = new PIDConstants(0.05, 0, 0);
+    public static final PIDConstants SHOULDER_PID = new PIDConstants(1.0, 0, 0);
+    public static final PIDConstants ELBOW_PID = new PIDConstants(1.0, 0, 0);
     public static final int LIFT_MIN_OUTPUT = -1;
     public static final int LIFT_MAX_OUTPUT = 1;
     public static final double SHOULDER_LENGTH = 200;
     public static final double ELBOW_LENGTH = 200;
     public static final double SHOULDER_GEAR_RATIO = 1.0 / 64.0;
-    public static final double SHOULDER_SPROCKET_RATIO = 1.0;
-    public static final double ELBOW_GEAR_RATIO = 1.0 / 64.0;
+    public static final double SHOULDER_SPROCKET_RATIO = 28.0/32.0;
+    public static final double ELBOW_GEAR_RATIO = 1.0 / 36.0;
     public static final double ELBOW_SPROCKET_RATIO = 1.0;
   }
 
   public static final class ClawConstants {
-    public static final int ROTATE_CAN_ID = 0;
-    public static final int INTAKE_CAN_ID = 0;
+    public static final int ROTATE_CAN_ID = 15;
+    public static final int INTAKE_CAN_ID = 14;
   }
 }
