@@ -23,13 +23,17 @@ public class Lift extends SubsystemBase {
     private final SparkMaxPIDController elbowMotorPID;
     private final CANSparkMax shoulderFollowMotor;
     private final RelativeEncoder shoulderFollowMotorEncoder;
+    private final SparkMaxPIDController shoulderFollowMotorPID;
     private final CANSparkMax elbowFollowMotor;
     private final RelativeEncoder elbowFollowMotorEncoder;
+    private final SparkMaxPIDController elbowFollowMotorPID;
     
     private double armX = 0;
     private double armY = 0;
     private double shoulderAngle = 0;
     private double elbowAngle = 0;
+
+    private double elbowTargetPosition = 0;
 
     private Lift() {
         shoulderMotor = new CANSparkMax(LiftConstants.SHOULDER_MOTOR_CAN_ID, MotorType.kBrushless);
@@ -55,20 +59,43 @@ public class Lift extends SubsystemBase {
         elbowMotorEncoder.setPositionConversionFactor(42);
         elbowMotorPID = elbowMotor.getPIDController();
         elbowMotorPID.setFeedbackDevice(elbowMotorEncoder);
-        elbowMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
-        elbowMotorPID.setI(LiftConstants.SHOULDER_PID.kP);
-        elbowMotorPID.setD(LiftConstants.SHOULDER_PID.kP);
+        elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        elbowMotorPID.setI(LiftConstants.ELBOW_PID.kP);
+        elbowMotorPID.setD(LiftConstants.ELBOW_PID.kP);
         elbowMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
         elbowMotor.setIdleMode(IdleMode.kBrake);
 
         shoulderFollowMotorEncoder = shoulderFollowMotor.getEncoder();
         shoulderFollowMotorEncoder.setPositionConversionFactor(42);
+        shoulderFollowMotorPID = shoulderFollowMotor.getPIDController();
+        shoulderFollowMotorPID.setFeedbackDevice(shoulderFollowMotorEncoder);
+        shoulderFollowMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        shoulderFollowMotorPID.setI(LiftConstants.SHOULDER_PID.kP);
+        shoulderFollowMotorPID.setD(LiftConstants.SHOULDER_PID.kP);
+        shoulderFollowMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
+        shoulderFollowMotor.setIdleMode(IdleMode.kBrake);
+
+
         elbowFollowMotorEncoder = elbowFollowMotor.getEncoder();
         elbowFollowMotorEncoder.setPositionConversionFactor(42);
-        shoulderFollowMotor.follow(shoulderMotor);
-        elbowFollowMotor.follow(elbowMotor);
+        elbowFollowMotorPID = elbowFollowMotor.getPIDController();
+        elbowFollowMotorPID.setFeedbackDevice(elbowFollowMotorEncoder);
+        elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        elbowFollowMotorPID.setI(LiftConstants.ELBOW_PID.kP);
+        elbowFollowMotorPID.setD(LiftConstants.ELBOW_PID.kP);
+        elbowFollowMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
+        elbowFollowMotor.setIdleMode(IdleMode.kBrake);
+        
+        shoulderFollowMotor.setInverted(true);
+        elbowFollowMotor.setInverted(true);
 
-        resetArm();
+        /*shoulderMotorEncoder.setInverted(true);
+        shoulderFollowMotorEncoder.setInverted(true);
+        elbowMotorEncoder.setInverted(true);
+        elbowFollowMotorEncoder.setInverted(true);*/
+
+
+        //resetArm();
         //moveArm(2, 2);
     }
 
@@ -80,18 +107,40 @@ public class Lift extends SubsystemBase {
         return instance;
     }
 
+    public void resetEncoders() {
+        shoulderMotorEncoder.setPosition(0);
+        shoulderFollowMotorEncoder.setPosition(0);
+        elbowMotorEncoder.setPosition(0);
+        elbowFollowMotorEncoder.setPosition(0);
+    }
+
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Shoulder joint encoder position", shoulderMotorEncoder.getPosition());
         SmartDashboard.putNumber("Elbow joint encoder position", elbowMotorEncoder.getPosition());
-        SmartDashboard.putNumber("Shoulder angle", shoulderAngle);
-        SmartDashboard.putNumber("Elbow angle", shoulderAngle + elbowAngle);
+        SmartDashboard.putNumber("Shoulder joint follow encoder position", shoulderFollowMotorEncoder.getPosition());
+        SmartDashboard.putNumber("Elbow joint follow encoder position", elbowFollowMotorEncoder.getPosition());
+        SmartDashboard.putNumber("Shoulder angle", Math.toDegrees(shoulderAngle));
+        SmartDashboard.putNumber("Elbow angle", Math.toDegrees(shoulderAngle + elbowAngle));
         SmartDashboard.putNumber("Arm X", armX);
         SmartDashboard.putNumber("Arm Y", armY);
+        SmartDashboard.putNumber("Elbow Target", elbowTargetPosition);
     }
 
     public void setMotorPosition(double position) {
-        shoulderMotorPID.setReference(position, CANSparkMax.ControlType.kPosition);
+        elbowTargetPosition = MathUtil.radToEncoders(
+            Math.PI / 6.0, 
+            LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO, 
+            42);
+        elbowMotorPID.setReference(
+            elbowTargetPosition, 
+            CANSparkMax.ControlType.kPosition);
+
+        elbowFollowMotorPID.setReference(
+                elbowTargetPosition, 
+            CANSparkMax.ControlType.kPosition);
+
+        
     }
 
     public void moveArm(double dx, double dy) {
@@ -121,10 +170,6 @@ public class Lift extends SubsystemBase {
                 LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO, 
                 42), 
             CANSparkMax.ControlType.kPosition);
-    }
-
-    public void resetEncoders() {
-        
     }
 
     public void resetArm() {
