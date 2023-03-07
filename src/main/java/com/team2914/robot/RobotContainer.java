@@ -103,7 +103,7 @@ public class RobotContainer {
             .whileTrue(new RunCommand(() -> claw.setIntakeSpeed(0.5), claw))
             .whileFalse(new RunCommand(() -> claw.setIntakeSpeed(0), claw));*/
             new JoystickButton(operatorController, 1)
-            .whileTrue(new RunCommand(() -> lift.setMotorPosition(0.5), lift));
+            .whileTrue(new RunCommand(() -> lift.setMotorPosition(Math.abs(operatorController.getY())), lift));
 
     }
 

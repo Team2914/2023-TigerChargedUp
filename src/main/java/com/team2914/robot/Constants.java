@@ -147,10 +147,10 @@ public final class Constants {
     public static final int ELBOW_MOTOR_CAN_ID = 11;
     public static final int SHOULDER_FOLLOW_MOTOR_CAN_ID = 12;
     public static final int ELBOW_FOLLOW_MOTOR_CAN_ID = 10;
-    public static final PIDConstants SHOULDER_PID = new PIDConstants(0.05, 0, 0);
-    public static final PIDConstants ELBOW_PID = new PIDConstants(0.000003, 0.000, 0.0001);
-    public static final double LIFT_MIN_OUTPUT = -0.5;
-    public static final double LIFT_MAX_OUTPUT = 0.5;
+    public static final PIDConstants SHOULDER_PID = new PIDConstants(0.0000006, 0.008, 0.008);
+    public static final PIDConstants ELBOW_PID = new PIDConstants(0.0000006, 0.008, 0.008);
+    public static final double LIFT_MIN_OUTPUT = -1;
+    public static final double LIFT_MAX_OUTPUT = 1;
     public static final double SHOULDER_LENGTH = 200;
     public static final double ELBOW_LENGTH = 200;
     public static final double SHOULDER_GEAR_RATIO = 64.0 / 1.0;

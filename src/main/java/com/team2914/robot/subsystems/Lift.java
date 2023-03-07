@@ -34,6 +34,7 @@ public class Lift extends SubsystemBase {
     private double elbowAngle = 0;
 
     private double elbowTargetPosition = 0;
+    private double shoulderTargetPosition = 0;
 
     private Lift() {
         shoulderMotor = new CANSparkMax(LiftConstants.SHOULDER_MOTOR_CAN_ID, MotorType.kBrushless);
@@ -129,9 +130,14 @@ public class Lift extends SubsystemBase {
 
     public void setMotorPosition(double position) {
         elbowTargetPosition = MathUtil.radToEncoders(
-            Math.PI / 6.0, 
+            (Math.PI / 3)*position, 
             LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO, 
             42);
+        shoulderTargetPosition = MathUtil.radToEncoders(
+            (Math.PI / 9)*position, 
+            LiftConstants.SHOULDER_GEAR_RATIO * LiftConstants.SHOULDER_SPROCKET_RATIO, 
+            42);
+        elbowTargetPosition -= shoulderTargetPosition;
         elbowMotorPID.setReference(
             elbowTargetPosition, 
             CANSparkMax.ControlType.kPosition);
@@ -139,6 +145,14 @@ public class Lift extends SubsystemBase {
         elbowFollowMotorPID.setReference(
                 elbowTargetPosition, 
             CANSparkMax.ControlType.kPosition);
+
+            shoulderMotorPID.setReference(
+                elbowTargetPosition, 
+                CANSparkMax.ControlType.kPosition);
+    
+            shoulderFollowMotorPID.setReference(
+                    elbowTargetPosition, 
+                CANSparkMax.ControlType.kPosition);
 
         
     }
