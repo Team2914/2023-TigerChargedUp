@@ -10,11 +10,12 @@ import json
 def update(t0):
     result, frame, raw_frame, depth = rf.detect()
     predictions = result["predictions"]
-    #depth = result["depth"]
 
-    #target_name_pub.setDefault()
-    #if len(predictions) > 0:
-        #target_name_pub.set(predictions[0]["x"])
+    for prediction in predictions:
+        predictionClass = prediction.class_name
+        predictionDepth = depth[(int(prediction.y), int(prediction.x))]
+
+        target_name_pub.set(predictionClass)
 
     t = time.time() - t0
     fps_pub.set(1 / t)
@@ -41,7 +42,6 @@ if __name__ == "__main__":
         device=None,
         blocking=True)
 
-    nt_inst.startClient4("Roboflow client")
     
     while True:
         #time.sleep(0.1)
