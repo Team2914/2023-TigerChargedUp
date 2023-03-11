@@ -3,14 +3,14 @@
     {
       "anchorPoint": {
         "x": 2.5,
-        "y": 3.55
+        "y": 1.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.5381181964869435,
-        "y": 4.299030709047754
+        "x": 2.168844124013035,
+        "y": 0.5546524426382181
       },
-      "holonomicAngle": 0,
+      "holonomicAngle": 180.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -24,18 +24,18 @@
     },
     {
       "anchorPoint": {
-        "x": 2.25,
-        "y": 2.75
+        "x": 4.147936842882233,
+        "y": 0.5823775750115614
       },
       "prevControl": {
-        "x": 1.5102045571258922,
-        "y": 2.626700759520982
+        "x": 3.2367007572061035,
+        "y": 0.4644529051005335
       },
       "nextControl": {
-        "x": 2.989795442874108,
-        "y": 2.873299240479018
+        "x": 5.118566134568167,
+        "y": 0.7079884245238581
       },
-      "holonomicAngle": 0,
+      "holonomicAngle": 180.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -49,37 +49,12 @@
     },
     {
       "anchorPoint": {
-        "x": 5.25,
-        "y": 3.25
+        "x": 6.123452930666544,
+        "y": 0.9021142828610453
       },
       "prevControl": {
-        "x": 5.356066017177982,
-        "y": 2.507537879754125
-      },
-      "nextControl": {
-        "x": 5.143933982822018,
-        "y": 3.992462120245875
-      },
-      "holonomicAngle": 0,
-      "isReversal": false,
-      "velOverride": null,
-      "isLocked": false,
-      "isStopPoint": false,
-      "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
-    },
-    {
-      "anchorPoint": {
-        "x": 5,
-        "y": 5
-      },
-      "prevControl": {
-        "x": 5.106066017177982,
-        "y": 4.257537879754125
+        "x": 5.719884212418697,
+        "y": 0.9178377394161557
       },
       "nextControl": null,
       "holonomicAngle": 0,
@@ -88,12 +63,21 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
+        "names": [
+          "extendArmLow"
+        ],
+        "executionBehavior": "sequential",
         "waitBehavior": "none",
         "waitTime": 0
       }
     }
   ],
-  "markers": []
+  "markers": [
+    {
+      "position": 1.5127272727271928,
+      "names": [
+        "extendArmLow"
+      ]
+    }
+  ]
 }

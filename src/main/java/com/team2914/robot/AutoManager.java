@@ -40,7 +40,7 @@ public class AutoManager {
             AutoConstants.PID_ROT_CONSTANTS,
             drivetrain::setModuleStates, 
             eventMap, 
-            false,
+            true,
             drivetrain);
 
         autoChooser = new SendableChooser<>();
@@ -66,10 +66,34 @@ public class AutoManager {
         );
     }
 
+    private CommandBase AutoFarSide() {
+        return autoBuilder.fullAuto(
+            PathPlanner.loadPath("AutoFarSide", new PathConstraints(
+                                                        AutoConstants.MAX_SPEED_METERS_PER_SECOND, 
+                                                        AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED))
+        );
+    }
+
+    private CommandBase AutoMid() {
+        return autoBuilder.fullAuto(
+            PathPlanner.loadPath("AutoMid", new PathConstraints(
+                                                        AutoConstants.MAX_SPEED_METERS_PER_SECOND, 
+                                                        AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED))
+        );
+    }
+
+    private CommandBase AutoNearSubstation() {
+        return autoBuilder.fullAuto(
+            PathPlanner.loadPath("AutoNearSubstation", new PathConstraints(
+                                                        AutoConstants.MAX_SPEED_METERS_PER_SECOND, 
+                                                        AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED))
+        );
+    }
+
     private HashMap<String, Command> buildEventMap() {
         return new HashMap<>(Map.ofEntries(
-            Map.entry("extendHigh", Commands.print("balls")),
-            Map.entry("dropCone", Commands.print("another balls"))
+            Map.entry("extendHigh", Commands.print("a")),
+            Map.entry("dropCone", Commands.print("b"))
         ));
     }
 
