@@ -55,6 +55,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     Vision.getInstance().closeRoboflow();
+    Lift.getInstance().setCoast();
   }
 
   @Override
@@ -69,6 +70,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+    Lift.getInstance().setBrake();
   }
 
   /** This function is called periodically during autonomous. */
@@ -85,7 +88,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    //Lift.getInstance().resetEncoders();
+    Lift.getInstance().setBrake();
   }
 
   /** This function is called periodically during operator control. */

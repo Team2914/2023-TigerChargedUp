@@ -11,6 +11,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import com.team2914.robot.RobotContainer;
 import com.team2914.robot.Constants.LiftConstants;
 import com.team2914.robot.utils.MathUtil;
 
@@ -29,6 +31,8 @@ public class Lift extends SubsystemBase {
     private final RelativeEncoder elbowFollowMotorEncoder;
     private final SparkMaxPIDController elbowFollowMotorPID;
     
+    private final double ARM_INIT_X = 11;
+    private final double ARM_INIT_Y = 18;
     private double armX = 0;
     private double armY = 0;
     private double shoulderAngle = 0;
@@ -39,6 +43,8 @@ public class Lift extends SubsystemBase {
 
     private final double StartShoulderAngle = Math.toRadians(35);
     private final double StartElbowAngle = -Math.PI;
+
+    private boolean cubeMode;
 
     private Lift() {
         shoulderMotor = new CANSparkMax(LiftConstants.SHOULDER_MOTOR_CAN_ID, MotorType.kBrushless);
@@ -97,10 +103,8 @@ public class Lift extends SubsystemBase {
         shoulderMotor.setInverted(true);
         elbowFollowMotor.setInverted(true);
 
-        /*shoulderMotorEncoder.setInverted(true);
-        shoulderFollowMotorEncoder.setInverted(true);
-        elbowMotorEncoder.setInverted(true);
-        elbowFollowMotorEncoder.setInverted(true);*/
+        cubeMode = false;
+
         resetArm();
         
         //moveArm(2, 2);
@@ -112,18 +116,6 @@ public class Lift extends SubsystemBase {
         }
 
         return instance;
-    }
-
-    public void resetEncoders() {
-        shoulderMotorEncoder.setPosition(0);
-        shoulderFollowMotorEncoder.setPosition(0);
-        elbowMotorEncoder.setPosition(0);
-        elbowFollowMotorEncoder.setPosition(0);
-    }
-
-    public void testSpeed(double spd) {
-        shoulderMotor.set(spd);
-        shoulderFollowMotor.set(spd);
     }
 
     @Override
@@ -140,17 +132,33 @@ public class Lift extends SubsystemBase {
         SmartDashboard.putNumber("Shoulder target", shoulderTargetPosition);
         SmartDashboard.putNumber("Shoulder Current", shoulderMotor.getOutputCurrent());
         SmartDashboard.putNumber("Shoulder Follower Current", shoulderFollowMotor.getOutputCurrent());
-        //updatePID();
-        System.out.println("Shoulder Voltage: "+shoulderMotor.getAppliedOutput());
-        
+        SmartDashboard.putNumber("Operator controller slider", OperatorController.getInstance().getSlider());
+
+        if (OperatorController.getInstance().getSlider() > 0) {
+            cubeMode = true;
+        } else {
+            cubeMode = false;
+        }
     }
 
-    public void moveArm(double dH) {
-        double travelA = Math.toRadians(60);
+    public void moveArm(double dH, double dK) {
+        double travelA = Math.toRadians(80);
         double dx = Math.cos(travelA)*dH;
         double dy = Math.sin(travelA)*dH;
         armX += dx;
         armY += dy;
+        if (armX < ARM_INIT_X) {
+            armX = ARM_INIT_X;
+        }
+        if (armY < ARM_INIT_Y) {
+            armY = ARM_INIT_Y;
+        }
+        if (armX > 400) {
+            armX = 400;
+        }
+        if (armY > 400) {
+            armY = 400;
+        }
 
         double shoulderLength2 = LiftConstants.SHOULDER_LENGTH * LiftConstants.SHOULDER_LENGTH;
         double elbowLength2 = LiftConstants.ELBOW_LENGTH * LiftConstants.ELBOW_LENGTH;
@@ -188,11 +196,67 @@ public class Lift extends SubsystemBase {
             CANSparkMax.ControlType.kPosition);
     }
 
+    public void setArmHigh() {
+        shoulderMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        shoulderFollowMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        if (cubeMode) {
+            armX = 130;
+            armY = 140;
+        } else {
+            armX = 130;
+            armY = 190;
+        }
+        
+    }
+
+    public void setArmMid() {
+        shoulderMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        shoulderFollowMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        if (cubeMode) {
+            armX = 60;
+            armY = 70;
+        } else {
+            armX = 90;
+            armY = 150;
+        }
+    }
+
+    public void liftGamePiece() {
+        shoulderMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        shoulderFollowMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        armX = 20;
+        armY = 25;
+    }
+
+    public void setArmLow() {
+        shoulderMotorPID.setP(LiftConstants.SHOULDER_PID.kP * 0.1);
+        shoulderFollowMotorPID.setP(LiftConstants.SHOULDER_PID.kP * 0.1);
+        elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP * 0.1);
+        elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP * 0.1);
+
+        armX = ARM_INIT_X;
+        armY = ARM_INIT_Y;
+    }
+
+    public void setCubeMode(boolean cubeMode) {
+        this.cubeMode = cubeMode;
+    }
+
+    public boolean getCubeMode() {
+        return cubeMode;
+    }
+
     public void resetArm() {
         shoulderAngle = StartShoulderAngle;
         elbowAngle = StartElbowAngle;
-        armX = 11;
-        armY = 18;
+        armX = ARM_INIT_X;
+        armY = ARM_INIT_Y;
         shoulderTargetPosition = MathUtil.radToEncoders(
             shoulderAngle, 
             LiftConstants.SHOULDER_GEAR_RATIO * LiftConstants.SHOULDER_SPROCKET_RATIO,
@@ -212,5 +276,19 @@ public class Lift extends SubsystemBase {
         elbowMotorPID.setReference(elbowTargetPosition, CANSparkMax.ControlType.kPosition);
         shoulderFollowMotorPID.setReference(shoulderTargetPosition, CANSparkMax.ControlType.kPosition);
         elbowFollowMotorPID.setReference(elbowTargetPosition, CANSparkMax.ControlType.kPosition);
+    }
+
+    public void setCoast() {
+        shoulderMotor.setIdleMode(IdleMode.kCoast);
+        shoulderFollowMotor.setIdleMode(IdleMode.kCoast);
+        elbowMotor.setIdleMode(IdleMode.kCoast);
+        elbowFollowMotor.setIdleMode(IdleMode.kCoast);
+    }
+
+    public void setBrake() {
+        shoulderMotor.setIdleMode(IdleMode.kBrake);
+        shoulderFollowMotor.setIdleMode(IdleMode.kBrake);
+        elbowMotor.setIdleMode(IdleMode.kBrake);
+        elbowFollowMotor.setIdleMode(IdleMode.kBrake);
     }
 }
