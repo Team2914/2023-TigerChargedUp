@@ -85,7 +85,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    Lift.getInstance().resetEncoders();
+    //Lift.getInstance().resetEncoders();
   }
 
   /** This function is called periodically during operator control. */

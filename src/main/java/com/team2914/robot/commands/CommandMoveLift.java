@@ -21,7 +21,7 @@ public class CommandMoveLift extends CommandBase {
 
     @Override
     public void execute() {
-        lift.setMotorPosition(pos);
+        //lift.setMotorPosition(pos);
     }
 
 }

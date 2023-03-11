@@ -4,6 +4,7 @@
 
 package com.team2914.robot;
 
+import com.team2914.lib.PIDConstantsEx;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.revrobotics.CANSparkMax.IdleMode;
 
@@ -141,14 +142,13 @@ public final class Constants {
       new Rotation3d(0, 0, 0)
     );
   }
-
   public static final class LiftConstants {
     public static final int SHOULDER_MOTOR_CAN_ID = 13;
     public static final int ELBOW_MOTOR_CAN_ID = 11;
     public static final int SHOULDER_FOLLOW_MOTOR_CAN_ID = 12;
     public static final int ELBOW_FOLLOW_MOTOR_CAN_ID = 10;
-    public static final PIDConstants SHOULDER_PID = new PIDConstants(0.0000006, 0.008, 0.008);
-    public static final PIDConstants ELBOW_PID = new PIDConstants(0.0000006, 0.008, 0.008);
+    public static final PIDConstants SHOULDER_PID = new PIDConstants(0.3, 0.001, 0.01);
+    public static final PIDConstants ELBOW_PID = new PIDConstants(0.1, 0.00, 0.0000001);
     public static final double LIFT_MIN_OUTPUT = -1;
     public static final double LIFT_MAX_OUTPUT = 1;
     public static final double SHOULDER_LENGTH = 200;

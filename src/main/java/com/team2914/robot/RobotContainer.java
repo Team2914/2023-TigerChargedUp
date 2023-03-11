@@ -47,11 +47,11 @@ public class RobotContainer {
                 MathUtil.applyDeadband(-driverController.getZ(), 0.06)),
                 drivetrain));
 
-        /*lift.setDefaultCommand(
+        lift.setDefaultCommand(
             new RunCommand(() -> lift.moveArm(
-                MathUtil.applyDeadband(-operatorController.getY(), 0.06),
-                MathUtil.applyDeadband(-operatorController.getX(), 0.06)),
-                lift));*/
+                MathUtil.applyDeadband(-operatorController.getY(), 0.06) * 1.0), 
+                lift)
+        );
 
     }
 
@@ -99,11 +99,14 @@ public class RobotContainer {
                 drivetrain));
 
         // OPERATOR CONTROLS
-        /*new JoystickButton(operatorController, 1)
+        new JoystickButton(operatorController, 1)
             .whileTrue(new RunCommand(() -> claw.setIntakeSpeed(0.5), claw))
-            .whileFalse(new RunCommand(() -> claw.setIntakeSpeed(0), claw));*/
-            new JoystickButton(operatorController, 1)
-            .whileTrue(new RunCommand(() -> lift.setMotorPosition(Math.abs(operatorController.getY())), lift));
+            .whileFalse(new RunCommand(() -> claw.setIntakeSpeed(0), claw));
+        
+        new JoystickButton(operatorController, 3)
+            .whileTrue(new RunCommand(() -> claw.closeClaw(), claw));
+        new JoystickButton(operatorController, 5)
+            .whileTrue(new RunCommand(() -> claw.openClaw(), claw));
 
     }
 
