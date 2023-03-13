@@ -65,7 +65,7 @@ public class Lift extends SubsystemBase {
         shoulderMotorPID.setD(LiftConstants.SHOULDER_PID.kD);
         shoulderMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
         shoulderMotor.setIdleMode(IdleMode.kBrake);
-        shoulderMotor.setSmartCurrentLimit(40);
+        shoulderMotor.setSmartCurrentLimit(60);
         
         elbowMotorEncoder = elbowMotor.getEncoder();
         elbowMotorEncoder.setPositionConversionFactor(42);
@@ -76,7 +76,7 @@ public class Lift extends SubsystemBase {
         elbowMotorPID.setD(LiftConstants.ELBOW_PID.kD);
         elbowMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
         elbowMotor.setIdleMode(IdleMode.kBrake);
-        elbowMotor.setSmartCurrentLimit(40);
+        elbowMotor.setSmartCurrentLimit(60);
 
         shoulderFollowMotorEncoder = shoulderFollowMotor.getEncoder();
         shoulderFollowMotorEncoder.setPositionConversionFactor(42);
@@ -87,7 +87,7 @@ public class Lift extends SubsystemBase {
         shoulderFollowMotorPID.setD(LiftConstants.SHOULDER_PID.kD);
         shoulderFollowMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
         shoulderFollowMotor.setIdleMode(IdleMode.kBrake);
-        shoulderFollowMotor.setSmartCurrentLimit(40);
+        shoulderFollowMotor.setSmartCurrentLimit(60);
 
         elbowFollowMotorEncoder = elbowFollowMotor.getEncoder();
         elbowFollowMotorEncoder.setPositionConversionFactor(42);
@@ -98,7 +98,7 @@ public class Lift extends SubsystemBase {
         elbowFollowMotorPID.setD(LiftConstants.ELBOW_PID.kD);
         elbowFollowMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
         elbowFollowMotor.setIdleMode(IdleMode.kBrake);
-        elbowFollowMotor.setSmartCurrentLimit(40);
+        elbowFollowMotor.setSmartCurrentLimit(60);
         
         shoulderMotor.setInverted(true);
         elbowFollowMotor.setInverted(true);
@@ -141,10 +141,10 @@ public class Lift extends SubsystemBase {
         }
     }
 
-    public void moveArm(double dH, double dK) {
-        double travelA = Math.toRadians(80);
+    public void moveArm(double dx, double dy) {
+        /*double travelA = Math.toRadians(80);
         double dx = Math.cos(travelA)*dH;
-        double dy = Math.sin(travelA)*dH;
+        double dy = Math.sin(travelA)*dH;*/
         armX += dx;
         armY += dy;
         if (armX < ARM_INIT_X) {
@@ -202,11 +202,11 @@ public class Lift extends SubsystemBase {
         elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
         elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
         if (cubeMode) {
-            armX = 130;
-            armY = 140;
+            armX = 95;
+            armY = 200;
         } else {
-            armX = 130;
-            armY = 190;
+            armX = 110;
+            armY = 220;
         }
         
     }
@@ -217,11 +217,11 @@ public class Lift extends SubsystemBase {
         elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
         elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
         if (cubeMode) {
-            armX = 60;
-            armY = 70;
+            armX = 80;
+            armY = 110;
         } else {
-            armX = 90;
-            armY = 150;
+            armX = 80;
+            armY = 210;
         }
     }
 
@@ -230,8 +230,8 @@ public class Lift extends SubsystemBase {
         shoulderFollowMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
         elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
         elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
-        armX = 20;
-        armY = 25;
+        armX = 35;
+        armY = 60;
     }
 
     public void setArmLow() {

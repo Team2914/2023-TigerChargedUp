@@ -1,15 +1,22 @@
 package com.team2914.robot.subsystems;
 
 import com.team2914.robot.Constants.OIConstants;
+import com.team2914.robot.commands.CommandBalanceRobot;
+
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
 public class DriverController extends TigerController {
     private static DriverController instance = null;
 
+    private CommandBalanceRobot balanceCommand;
+
     private DriverController(int port) {
         super(port);
+        balanceCommand = new CommandBalanceRobot(Drivetrain.getInstance());
     }
 
     public static DriverController getInstance() {
@@ -27,9 +34,14 @@ public class DriverController extends TigerController {
         new JoystickButton(joystick, OIConstants.JOYSTICK_TRIGGER)
             .whileTrue(new RunCommand(() -> drivetrain.setX(), drivetrain));
 
-        new JoystickButton(joystick, 8)
+        new JoystickButton(joystick, 14)
             .whileTrue(new RunCommand(() -> 
-                drivetrain.setFieldRelative(!drivetrain.isFieldRelative())
+                drivetrain.setFieldRelative(true)
+            , drivetrain));
+
+        new JoystickButton(joystick, 15)
+            .whileTrue(new RunCommand(() -> 
+                drivetrain.setFieldRelative(false)
             , drivetrain));
 
         // Hat controls 

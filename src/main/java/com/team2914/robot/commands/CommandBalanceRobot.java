@@ -27,7 +27,7 @@ public class CommandBalanceRobot extends CommandBase {
 
     @Override
     public void execute() {
-        if (doBalance) drivetrain.drive(Math.sin(Math.toRadians(pitch)) * -1, 0, 0);
+        if (doBalance) drivetrain.drive(Math.sin(Math.toRadians(pitch - (Math.signum(pitch)*10))) * -1, 0, 0);
     }
 
     @Override

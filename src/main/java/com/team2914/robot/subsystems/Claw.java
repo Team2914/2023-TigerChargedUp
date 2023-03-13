@@ -34,7 +34,7 @@ public class Claw extends SubsystemBase {
 
         rotateMotor = new CANSparkMax(ClawConstants.ROTATE_CAN_ID, MotorType.kBrushed);
         rotateMotor.setIdleMode(IdleMode.kBrake);
-        rotateMotor.setSmartCurrentLimit(15);
+        rotateMotor.setSmartCurrentLimit(8);
         
     }
 
@@ -57,7 +57,7 @@ public class Claw extends SubsystemBase {
     }
 
     public void closeClaw() {
-        set(-1.0);
+        set(-0.15);
         closed = true;
     }
 
@@ -67,7 +67,7 @@ public class Claw extends SubsystemBase {
 
     public void openClaw() {
         //System.out.print("running open claw");
-        set(0.75);
+        set(0.3);
         closed = false;
     }
 

@@ -9,6 +9,7 @@ import com.team2914.lib.gyro.BNO055;
 import com.team2914.lib.gyro.BNO055.opmode_t;
 import com.team2914.lib.gyro.BNO055.vector_type_t;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -28,6 +29,15 @@ import com.team2914.robot.utils.MiscUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.EstimatedRobotPose;
 import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
+
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPoint;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 
 public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance = null;
@@ -96,6 +106,7 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Pose X", poseEstimator.getEstimatedPosition().getX());
     SmartDashboard.putBoolean("Field relative", isFieldRelative);
     SmartDashboard.putString("Current location", currentLocation.name());
+    SmartDashboard.putNumber("Robot pitch", gyro.getVector()[2]);
 
     poseEstimator.update(
         gyro.getRotation2d(),
@@ -110,10 +121,10 @@ public class Drivetrain extends SubsystemBase {
 
     Optional<EstimatedRobotPose> camResult = vision.getEstimatedRobotPose(poseEstimator.getEstimatedPosition());
 
-    if (camResult.isPresent()) {
+    /*if (camResult.isPresent()) {
       EstimatedRobotPose camPose = camResult.get();
       poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
-    }
+    }*/
     
     currentLocation = FieldLocation.OPEN;
     Translation2d translation = poseEstimator.getEstimatedPosition().getTranslation();
@@ -216,6 +227,15 @@ public class Drivetrain extends SubsystemBase {
 
   public boolean isFieldRelative() {
     return isFieldRelative;
+  }
+
+  public void autoBalance() {
+    double pitch = gyro.getVector()[2];
+    boolean doBalance = (Math.abs(pitch) >= 10) ? true : false;
+    if (!doBalance) return;
+
+    System.out.println("Auto balancing...");
+    drive(Math.sin(Math.toRadians(pitch - (Math.signum(pitch)*10))) * -1, 0, 0);
   }
 
   public enum FieldLocation {
