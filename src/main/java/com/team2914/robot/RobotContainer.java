@@ -8,6 +8,7 @@ import edu.wpi.first.math.MathUtil;
 import com.team2914.robot.Constants.OIConstants;
 import com.team2914.robot.commands.CommandMoveLift;
 import com.team2914.robot.subsystems.Drivetrain;
+import com.team2914.robot.subsystems.LED;
 import com.team2914.robot.subsystems.Lift;
 import com.team2914.robot.subsystems.Claw;
 import com.team2914.robot.subsystems.DriverController;
@@ -25,9 +26,7 @@ public class RobotContainer {
     private final Drivetrain drivetrain;
     private final Lift lift;
     private final Claw claw;
-
-    //private final Joystick driverController;
-    //private final Joystick operatorController;
+    private final LED led;
 
     private final DriverController driverController;
     private final OperatorController operatorController;
@@ -39,6 +38,7 @@ public class RobotContainer {
         drivetrain = Drivetrain.getInstance();
         lift = Lift.getInstance();
         claw = Claw.getInstance();
+        led = LED.getInstance();
 
         driverController = DriverController.getInstance();
         operatorController = OperatorController.getInstance();

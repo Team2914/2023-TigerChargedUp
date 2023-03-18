@@ -4,7 +4,6 @@
 
 package com.team2914.robot;
 
-import com.team2914.lib.PIDConstantsEx;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.revrobotics.CANSparkMax.IdleMode;
 
@@ -12,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -141,6 +141,10 @@ public final class Constants {
       new Translation3d(0, 0, 0),
       new Rotation3d(0, 0, 0)
     );
+
+    public static final Color CONE_COLOR = new Color(0.33, 0.6, 0.06);
+    public static final Color CUBE_COLOR = new Color(0.16, 0.27, 0.56);
+    public static final Color DEFAULT_COLOR = new Color(0, 0, 0);
   }
   public static final class LiftConstants {
     public static final int SHOULDER_MOTOR_CAN_ID = 13;

@@ -60,8 +60,6 @@ public class AutoManager {
         autoChooser.addOption("PIDTEST", PIDTEST());
         autoChooser.addOption("Backwards - 1 meter", Backwards1Meter());
         autoChooser.addOption("Backwards - 3.5 meter", Backwards3AndAHalfMeter());
-        autoChooser.addOption("Charge station balance (cry)", ChargeStationBalance());
-        autoChooser.addOption("Cube mid", CubeMid());
         
         SmartDashboard.putData("Autonomous OpMode", autoChooser);
     }
@@ -151,21 +149,7 @@ public class AutoManager {
             Drivetrain.getInstance()::setModuleStates, 
             Drivetrain.getInstance());
     }
-
-    private CommandBase CubeMid() {
-        return new SequentialCommandGroup(
-            new RunCommand(() -> Lift.getInstance().setArmMid(), Lift.getInstance()),
-            new RunCommand(() -> Claw.getInstance().openClaw(), Claw.getInstance())
-        );
-    }
-
-    private CommandBase ChargeStationBalance() {
-        return new SequentialCommandGroup(
-            Backwards1Meter(),
-            new RunCommand(() -> Drivetrain.getInstance().autoBalance())
-        );
-    }
-
+    
     private HashMap<String, Command> buildEventMap() {
         return new HashMap<>(Map.ofEntries(
             Map.entry("extendHigh", Commands.print("a")),
