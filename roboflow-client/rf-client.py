@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import math
-#import ntcore
+import ntcore
 import time
 from roboflowoak import RoboflowOak
 import cv2
@@ -54,12 +54,13 @@ if __name__ == "__main__":
     nt_inst = ntcore.NetworkTableInstance.getDefault()
     nt_inst.startClient4("Roboflow client")
     nt_inst.setServerTeam(2914)
+    #nt_inst.setServer("localhost")
     rf_table = nt_inst.getTable("rf_data")
 
     x_coords_pub = rf_table.getDoubleArrayTopic("x_coords").publish()
     y_coords_pub = rf_table.getDoubleArrayTopic("y_coords").publish()
     z_coords_pub = rf_table.getDoubleArrayTopic("z_coords").publish()
-    classes_pub = rf_table.getDoubleArrayTopic("classes").publish()
+    classes_pub = rf_table.getStringArrayTopic("classes").publish()
 
     rf = RoboflowOak(
         model="2023-charged-up", 
@@ -76,5 +77,7 @@ if __name__ == "__main__":
     
     while True:
         #time.sleep(0.1)
+        if (len(nt_inst.getConnections()) == 0):
+            print("Network Tables Not Connected")
         update(time.time())
         time.sleep(0.00001)
