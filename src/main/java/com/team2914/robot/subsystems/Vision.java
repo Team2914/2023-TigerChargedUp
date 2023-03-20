@@ -23,9 +23,6 @@ public class Vision extends SubsystemBase {
     private static Vision instance = null;
     private final PhotonCamera camera;
     private final PhotonPoseEstimator poseEstimator;
-    private final NetworkTableInstance ntInst;
-    private final NetworkTable roboflowTable;
-    private final StringSubscriber clawTargetName;
 
     private Vision() {
         camera = new PhotonCamera(OIConstants.PHOTON_CAMERA_NAME);
@@ -38,14 +35,10 @@ public class Vision extends SubsystemBase {
         }
 
         poseEstimator = new PhotonPoseEstimator(fieldLayout,
-                                                PoseStrategy.CLOSEST_TO_REFERENCE_POSE, 
+                                                PoseStrategy.MULTI_TAG_PNP,
                                                 camera, 
                                                 VisionConstants.ROBOT_TO_CAM);
 
-        ntInst = NetworkTableInstance.getDefault();
-        roboflowTable = ntInst.getTable("/roboflow/");
-        StringTopic clawTargetNameTopic = roboflowTable.getStringTopic("clawTargetName");
-        clawTargetName = clawTargetNameTopic.subscribe("none");
     }
 
     public static Vision getInstance() {
@@ -58,10 +51,13 @@ public class Vision extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putString("Claw target", clawTargetName.get());
     }
 
     public Optional<EstimatedRobotPose> getEstimatedRobotPose(Pose2d previousEstimatedPose) {
+        if (poseEstimator == null) {
+            return Optional.empty();
+        }
+
         poseEstimator.setReferencePose(previousEstimatedPose);
         return poseEstimator.update();
 
@@ -71,7 +67,4 @@ public class Vision extends SubsystemBase {
         return camera.getLatestResult().getBestTarget();
     }
 
-    public void closeRoboflow() {
-        ntInst.close();
-    }
 }

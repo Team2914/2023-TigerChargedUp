@@ -10,8 +10,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxAbsoluteEncoder.Type;
 
 public class TigerSparkMAX {
-    private final CANSparkMax sparkMax;
-    private final SparkMaxPIDController sparkPID;
+    public final CANSparkMax sparkMax;
+    public final SparkMaxPIDController sparkPID;
 
     public TigerSparkMAX(
         int canID, 
@@ -92,5 +92,7 @@ public class TigerSparkMAX {
     public void setIdleMode(IdleMode idleMode) {
         sparkMax.setIdleMode(idleMode);
     }
+
+    
 }
 

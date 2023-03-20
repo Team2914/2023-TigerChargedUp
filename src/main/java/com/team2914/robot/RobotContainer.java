@@ -53,8 +53,8 @@ public class RobotContainer {
 
         lift.setDefaultCommand(
             new RunCommand(() -> lift.moveArm(
-                MathUtil.applyDeadband(-operatorController.getY(), 0.06) * 0.05, 
-                MathUtil.applyDeadband(operatorController.getX(), 0.06) * 0.05),
+                MathUtil.applyDeadband(-operatorController.getY(), 0.06) * 0.15, 
+                MathUtil.applyDeadband(operatorController.getX(), 0.06) * 0.15),
                 lift)
         );
 

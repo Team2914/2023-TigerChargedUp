@@ -14,6 +14,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.team2914.robot.Constants.AutoConstants;
 import com.team2914.robot.Constants.ClawConstants;
 import com.team2914.robot.Constants.VisionConstants;
+import com.team2914.robot.utils.ClawState;
 import com.revrobotics.CANSparkMax.IdleMode;
 
 import edu.wpi.first.wpilibj.I2C;
@@ -31,7 +32,6 @@ public class Claw extends SubsystemBase {
     private Color detectedColor;
     private ColorMatchResult colorMatchResult;
     private int distance;
-    public boolean closed = false;
 
     private Claw() {
         intakeMotor = new CANSparkMax(ClawConstants.INTAKE_CAN_ID, MotorType.kBrushless);
@@ -40,7 +40,7 @@ public class Claw extends SubsystemBase {
 
         rotateMotor = new CANSparkMax(ClawConstants.ROTATE_CAN_ID, MotorType.kBrushed);
         rotateMotor.setIdleMode(IdleMode.kBrake);
-        rotateMotor.setSmartCurrentLimit(8);
+        rotateMotor.setSmartCurrentLimit(20);
 
         colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
         colorMatcher = new ColorMatch();
@@ -59,7 +59,7 @@ public class Claw extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("/Claw/Claw closed", closed);
+        SmartDashboard.putBoolean("/Claw/Claw closed", ClawState.closed);
         SmartDashboard.putNumber("/Claw/Claw rotation current", rotateMotor.getOutputCurrent());
         SmartDashboard.putNumber("/Claw/Intake rotation voltage", intakeMotor.getAppliedOutput());
         SmartDashboard.putNumber("/Claw/Intake rotation current", intakeMotor.getOutputCurrent());
@@ -75,17 +75,28 @@ public class Claw extends SubsystemBase {
         colorMatchResult = colorMatcher.matchClosestColor(detectedColor);
 
         if (colorMatchResult.color.equals(VisionConstants.CONE_COLOR) && distance >= 80) {
+            ClawState.setCone();
+            if (distance > 100)
+                ClawState.hasGamePiece = true;
             SmartDashboard.putString("/Claw/Detected game piece", "Cone");
         } else if (colorMatchResult.color.equals(VisionConstants.CUBE_COLOR) && distance >= 80) {
             SmartDashboard.putString("/Claw/Detected game piece", "Cube");
+            if (distance > 100)
+                ClawState.setCube();
+            ClawState.hasGamePiece = true;
         } else {
+            ClawState.hasGamePiece = false;
             SmartDashboard.putString("/Claw/Detected game piece", "None");
+        }
+
+        //System.out.println(ClawState.closed);
+        if (rotateMotor.getOutputCurrent() > 12 && !ClawState.closed && rotateMotor.getAppliedOutput() < 0) {
+            ClawState.closed = true;
         }
     }
 
     public void closeClaw() {
-        set(-0.15);
-        closed = true;
+        set(-0.3);
     }
 
     public void set(double val) {
@@ -94,7 +105,25 @@ public class Claw extends SubsystemBase {
 
     public void openClaw() {
         set(0.3);
-        closed = false;
+        ClawState.closed = false;
+    }
+
+    public void runIntake() {
+        ClawState.setIntaking();
+        setIntakeSpeed(0.75);
+    }
+
+    public void runOuttake() {
+        ClawState.setOuttaking();
+        setIntakeSpeed(-0.75);
+        if (ClawState.hasCube()) {
+            ClawState.closed = false;
+        }
+    }
+
+    public void stopIntake() {
+        ClawState.setStopIntake();
+        setIntakeSpeed(0);
     }
 
     public void setIntakeSpeed(double speed) {

@@ -106,14 +106,14 @@ public final class Constants {
   }
 
   public static final class AutoConstants {
-    public static final double MAX_SPEED_METERS_PER_SECOND = 4;
-    public static final double MAX_ACCEL_METERS_PER_SEC_SQUARED = 3;
+    public static final double MAX_SPEED_METERS_PER_SECOND = 1.0;
+    public static final double MAX_ACCEL_METERS_PER_SEC_SQUARED = 0.5;
     public static final double MAX_ANGULAR_SPEED_RADS_PER_SECOND = Math.PI;
     public static final double MAX_ANGULAR_SPEED_RADS_PER_SEC_SQUARED = Math.PI;
 
-    public static PIDConstants PID_X_CONSTANTS = new PIDConstants(2.22, 0, 0);
-    public static PIDConstants PID_Y_CONSTANTS = new PIDConstants(2.22, 0, 0);
-    public static PIDConstants PID_ROT_CONSTANTS = new PIDConstants(5, 0, 0);
+    public static PIDConstants PID_X_CONSTANTS = new PIDConstants(2.0, 0, 0);
+    public static PIDConstants PID_Y_CONSTANTS = new PIDConstants(2.0, 0, 0);
+    public static PIDConstants PID_ROT_CONSTANTS = new PIDConstants(0.1, 0, 0);
 
     public static Translation2d BLU_GRID1_BB_TOP_LEFT = new Translation2d(1.40, 1.85);
     public static Translation2d BLU_GRID1_BB_BTM_RITE = new Translation2d(2.5, 0);
@@ -133,7 +133,7 @@ public final class Constants {
 
     public static final int JOYSTICK_TRIGGER = 1;
 
-    public static final String PHOTON_CAMERA_NAME = "HD_Pro_Webcam_C920";
+    public static final String PHOTON_CAMERA_NAME = "Front Camera";
   }
 
   public static final class VisionConstants {
@@ -151,8 +151,8 @@ public final class Constants {
     public static final int ELBOW_MOTOR_CAN_ID = 11;
     public static final int SHOULDER_FOLLOW_MOTOR_CAN_ID = 12;
     public static final int ELBOW_FOLLOW_MOTOR_CAN_ID = 10;
-    public static final PIDConstants SHOULDER_PID = new PIDConstants(0.005, 0.0000, 0.0000001);
-    public static final PIDConstants ELBOW_PID = new PIDConstants(0.005, 0.0000, 0.000000);
+    public static final PIDConstants SHOULDER_PID = new PIDConstants(0.005, 0.000, 0.0000001);
+    public static final PIDConstants ELBOW_PID = new PIDConstants(0.008, 0.000000, 0.000);
     public static final double LIFT_MIN_OUTPUT = -1;
     public static final double LIFT_MAX_OUTPUT = 1;
     public static final double SHOULDER_LENGTH = 200;

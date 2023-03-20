@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.team2914.lib.TigerSparkMAX;
 import com.team2914.robot.RobotContainer;
 import com.team2914.robot.Constants.LiftConstants;
+import com.team2914.robot.utils.ClawState;
 import com.team2914.robot.utils.MathUtil;
 
 public class Lift extends SubsystemBase {
@@ -119,6 +120,11 @@ public class Lift extends SubsystemBase {
         return instance;
     }
 
+    public void runLift(double val){
+        elbowSpark.sparkMax.set(val*0.1);
+        elbowFollowSpark.sparkMax.set(val*0.1);
+    }
+
     @Override
     public void periodic() {
         SmartDashboard.putNumber("/Arm/Shoulder joint encoder position", shoulderEncoder.getPosition());
@@ -131,6 +137,7 @@ public class Lift extends SubsystemBase {
         SmartDashboard.putNumber("/Arm/Arm Y", armY);
         SmartDashboard.putNumber("/Arm/Elbow target position", elbowTargetPosition);
         SmartDashboard.putNumber("/Arm/Shoulder target position", shoulderTargetPosition);
+        SmartDashboard.putNumber("/Arm/Elbow Output", elbowSpark.sparkMax.getAppliedOutput());
 
         if (OperatorController.getInstance().getSlider() > 0) {
             cubeMode = true;
@@ -196,14 +203,18 @@ public class Lift extends SubsystemBase {
         shoulderFollowSpark.setP(LiftConstants.SHOULDER_PID.kP);
         elbowSpark.setP(LiftConstants.ELBOW_PID.kP);
         elbowFollowSpark.setP(LiftConstants.ELBOW_PID.kP);
+        // elbowSpark.setI(LiftConstants.ELBOW_PID.kI);
+        // elbowFollowSpark.setI(LiftConstants.ELBOW_PID.kI);
 
-        if (cubeMode) {
-            armX = 95;
-            armY = 200;
+        if (ClawState.hasCube()) {
+            armX = 100;
+            armY = 180;
         } else {
             armX = 110;
             armY = 220;
         }
+
+        ClawState.liftLevel = 3;
         
     }
 
@@ -212,14 +223,18 @@ public class Lift extends SubsystemBase {
         shoulderFollowSpark.setP(LiftConstants.SHOULDER_PID.kP);
         elbowSpark.setP(LiftConstants.ELBOW_PID.kP);
         elbowFollowSpark.setP(LiftConstants.ELBOW_PID.kP);
+        // elbowSpark.setI(LiftConstants.ELBOW_PID.kI);
+        // elbowFollowSpark.setI(LiftConstants.ELBOW_PID.kI);
 
-        if (cubeMode) {
+        if (ClawState.hasCube()) {
             armX = 80;
             armY = 110;
         } else {
             armX = 80;
             armY = 210;
         }
+
+        ClawState.liftLevel = 2;
     }
 
     public void liftGamePiece() {
@@ -227,19 +242,28 @@ public class Lift extends SubsystemBase {
         shoulderFollowSpark.setP(LiftConstants.SHOULDER_PID.kP);
         elbowSpark.setP(LiftConstants.ELBOW_PID.kP);
         elbowFollowSpark.setP(LiftConstants.ELBOW_PID.kP);
+        // elbowSpark.setI(LiftConstants.ELBOW_PID.kI);
+        // elbowFollowSpark.setI(LiftConstants.ELBOW_PID.kI);
 
         armX = 35;
         armY = 60;
+
+        ClawState.liftLevel = 1;
     }
 
     public void setArmLow() {
-        shoulderSpark.setP(LiftConstants.SHOULDER_PID.kP * 0.1);
-        shoulderFollowSpark.setP(LiftConstants.SHOULDER_PID.kP * 0.1);
-        elbowSpark.setP(LiftConstants.ELBOW_PID.kP * 0.1);
-        elbowFollowSpark.setP(LiftConstants.ELBOW_PID.kP * 0.1);
+        shoulderSpark.setP(LiftConstants.SHOULDER_PID.kP * 0.5);
+        shoulderFollowSpark.setP(LiftConstants.SHOULDER_PID.kP * 0.5);
+        elbowSpark.setP(LiftConstants.ELBOW_PID.kP * 0.01);
+        
+        elbowFollowSpark.setP(LiftConstants.ELBOW_PID.kP * 0.01);
+        // elbowSpark.setI(0);
+        // elbowFollowSpark.setI(0); 
 
         armX = ARM_INIT_X;
         armY = ARM_INIT_Y;
+
+        ClawState.liftLevel = 0;
     }
 
     public void setCubeMode(boolean cubeMode) {
