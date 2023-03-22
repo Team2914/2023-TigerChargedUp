@@ -1,6 +1,8 @@
 package com.team2914.robot.subsystems;
 
 import com.team2914.robot.Constants.OIConstants;
+import com.team2914.robot.utils.ClawState;
+
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -38,7 +40,7 @@ public class OperatorController extends TigerController {
 
         new JoystickButton(joystick, 5)
             .whileTrue(new RunCommand(() -> claw.openClaw(), claw))
-            .whileFalse(new RunCommand(claw.closed ? () -> {} : () -> claw.set(0), claw));
+            .whileFalse(new RunCommand(ClawState.closed ? () -> {} : () -> claw.set(0), claw));
 
         new JoystickButton(joystick, 4)
             .whileTrue(new RunCommand(() -> lift.setArmHigh(), lift));
