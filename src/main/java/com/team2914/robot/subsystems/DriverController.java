@@ -46,9 +46,9 @@ public class DriverController extends TigerController {
             , drivetrain));
 
         new JoystickButton(joystick, 8)
-            .whileTrue(new RunCommand(() -> drivetrain.align(), drivetrain));
+            .whileTrue(new RunCommand(() -> drivetrain.align(0), drivetrain));
         new JoystickButton(joystick, 9)
-            .whileTrue(new RunCommand(() -> drivetrain.align180(), drivetrain));
+            .whileTrue(new RunCommand(() -> drivetrain.align(180), drivetrain));
 
         // Hat controls 
         new POVButton(joystick, 90)

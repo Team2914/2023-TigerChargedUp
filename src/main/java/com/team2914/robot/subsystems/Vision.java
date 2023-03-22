@@ -35,7 +35,7 @@ public class Vision extends SubsystemBase {
         }
 
         poseEstimator = new PhotonPoseEstimator(fieldLayout,
-                                                PoseStrategy.MULTI_TAG_PNP,
+        PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
                                                 camera, 
                                                 VisionConstants.ROBOT_TO_CAM);
 

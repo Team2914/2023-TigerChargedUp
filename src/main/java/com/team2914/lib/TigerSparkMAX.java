@@ -13,6 +13,8 @@ public class TigerSparkMAX {
     public final CANSparkMax sparkMax;
     public final SparkMaxPIDController sparkPID;
 
+    private double pidSetpoint;
+
     public TigerSparkMAX(
         int canID, 
         MotorType motorType, 
@@ -51,6 +53,7 @@ public class TigerSparkMAX {
 
     public void setPIDReference(double setpoint, CANSparkMax.ControlType controlType) {
         sparkPID.setReference(setpoint, controlType);
+        pidSetpoint = setpoint;
     }
 
     public void setPositionPIDWrappingEnabled(boolean enable) {
@@ -92,7 +95,6 @@ public class TigerSparkMAX {
     public void setIdleMode(IdleMode idleMode) {
         sparkMax.setIdleMode(idleMode);
     }
-
-    
+ 
 }
 

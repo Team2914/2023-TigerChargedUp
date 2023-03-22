@@ -211,7 +211,7 @@ public class Lift extends SubsystemBase {
             armY = 180;
         } else {
             armX = 110;
-            armY = 220;
+            armY = 210;
         }
 
         ClawState.liftLevel = 3;

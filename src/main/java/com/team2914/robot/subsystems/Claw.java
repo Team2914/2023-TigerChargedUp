@@ -40,7 +40,7 @@ public class Claw extends SubsystemBase {
 
         rotateMotor = new CANSparkMax(ClawConstants.ROTATE_CAN_ID, MotorType.kBrushed);
         rotateMotor.setIdleMode(IdleMode.kBrake);
-        rotateMotor.setSmartCurrentLimit(20);
+        rotateMotor.setSmartCurrentLimit(15);
 
         colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
         colorMatcher = new ColorMatch();
@@ -90,13 +90,13 @@ public class Claw extends SubsystemBase {
         }
 
         //System.out.println(ClawState.closed);
-        if (rotateMotor.getOutputCurrent() > 12 && !ClawState.closed && rotateMotor.getAppliedOutput() < 0) {
+        if (rotateMotor.getOutputCurrent() > 8 && !ClawState.closed && rotateMotor.getAppliedOutput() < 0) {
             ClawState.closed = true;
         }
     }
 
     public void closeClaw() {
-        set(-0.3);
+        set(-0.25);
     }
 
     public void set(double val) {

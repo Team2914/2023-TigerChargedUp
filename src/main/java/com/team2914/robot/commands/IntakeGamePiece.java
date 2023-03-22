@@ -16,7 +16,8 @@ public class IntakeGamePiece extends CommandBase {
   public IntakeGamePiece(Claw claw, Lift lift) {
     this.claw = claw;
     this.lift = lift;
-    // Use addRequirements() here to declare subsystem dependencies.
+    
+    addRequirements(claw, lift);
   }
 
   // Called when the command is initially scheduled.
@@ -29,7 +30,7 @@ public class IntakeGamePiece extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    System.out.println(ClawState.liftLevel);
+    //System.out.println(ClawState.liftLevel);
     if (!ClawState.hasGamePiece && !ClawState.closed) {
       claw.runIntake();
     } else if (ClawState.hasGamePiece && !ClawState.closed) {

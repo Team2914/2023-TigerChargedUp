@@ -57,7 +57,7 @@ public class Drivetrain extends SubsystemBase {
       DriveConstants.REAR_RIGHT_TURN_CAN_ID,
       DriveConstants.BACK_RIGHT_ANGULAR_OFFSET);
 
-  //private final AHRS gyro;
+  private final PIDController alignController;
   private final BNO055 gyro;
   private final Vision vision;
   private Field2d field = new Field2d();
@@ -82,6 +82,7 @@ public class Drivetrain extends SubsystemBase {
       },
       new Pose2d());
 
+    alignController = new PIDController(0.01, 0, 0);
     SmartDashboard.putData("Field", field);
     currentLocation = FieldLocation.OPEN;
   }
@@ -124,6 +125,7 @@ public class Drivetrain extends SubsystemBase {
             camPose.estimatedPose.getTranslation().getX(), 
             camPose.estimatedPose.getTranslation().getY())
         .getDistance(poseEstimator.getEstimatedPosition().getTranslation());
+
       poseEstimator.addVisionMeasurement(
         camPose.estimatedPose.toPose2d(), 
         camPose.timestampSeconds, 
@@ -146,7 +148,6 @@ public class Drivetrain extends SubsystemBase {
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
   }
-
 
   public void drive(double xSpeed, double ySpeed, double rot) {
     // Adjust input based on max speed
@@ -220,19 +221,19 @@ public class Drivetrain extends SubsystemBase {
       pose);
   }
 
-  public void align() {
-    PIDController controller = new PIDController(0.01, 0, 0);
-    controller.setSetpoint(0);
-    System.out.println(controller.calculate(poseEstimator.getEstimatedPosition().getRotation().getDegrees(), controller.getSetpoint()));
-    drive(0, 0, controller.calculate(poseEstimator.getEstimatedPosition().getRotation().getDegrees(), controller.getSetpoint()));
+  public void align(double angle) {
+    alignController.setSetpoint(angle);
+
+    drive(
+      0, 
+      0, 
+      alignController.calculate(
+        poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 
+        alignController.getSetpoint()
+      )
+    );
   }
 
-  public void align180() {
-    PIDController controller = new PIDController(0.01, 0, 0);
-    controller.setSetpoint(180);
-    System.out.println(controller.calculate(poseEstimator.getEstimatedPosition().getRotation().getDegrees(), controller.getSetpoint()));
-    drive(0, 0, controller.calculate(poseEstimator.getEstimatedPosition().getRotation().getDegrees(), controller.getSetpoint()));
-  }
 
   public void setFieldRelative(boolean fieldRelative) {
     this.isFieldRelative = fieldRelative;

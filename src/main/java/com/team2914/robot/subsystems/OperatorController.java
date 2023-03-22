@@ -31,11 +31,11 @@ public class OperatorController extends TigerController {
 
         IntakeGamePiece intakeCommand = new IntakeGamePiece(claw, lift);
 
-        new JoystickButton(joystick, 1).whileTrue(intakeCommand).whileFalse(new RunCommand(() -> claw.stopIntake(), claw));
-        /*new JoystickButton(joystick, 1)
-            .whileTrue(new RunCommand(() -> claw.setIntakeSpeed(0.75), claw))
-            .whileFalse(new RunCommand(() -> claw.setIntakeSpeed(0), claw));*/
-            new JoystickButton(joystick, 2)
+        new JoystickButton(joystick, 1)
+            .whileTrue(intakeCommand)
+            .whileFalse(new RunCommand(() -> claw.stopIntake(), claw));
+
+        new JoystickButton(joystick, 2)
             .whileTrue(new RunCommand(() -> claw.setIntakeSpeed(-0.75), claw))
             .whileFalse(new RunCommand(() -> claw.setIntakeSpeed(0), claw));
         
