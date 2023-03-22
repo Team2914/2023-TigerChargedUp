@@ -39,6 +39,27 @@ public class TigerSparkMAX {
         sparkPID.setOutputRange(minOutput, maxOutput);
     }
 
+    public static void init(
+        CANSparkMax sparkMax,
+        SparkMaxPIDController sparkPID,
+        PIDConstants pidConstants, 
+        double ffGain, 
+        double minOutput, 
+        double maxOutput, 
+        IdleMode idleMode,
+        int currentLimit) {
+
+        sparkMax.restoreFactoryDefaults();
+        sparkMax.setIdleMode(idleMode);
+        sparkMax.setSmartCurrentLimit(currentLimit);
+
+        sparkPID.setP(pidConstants.kP);
+        sparkPID.setI(pidConstants.kI);
+        sparkPID.setD(pidConstants.kD);
+        sparkPID.setFF(ffGain);
+        sparkPID.setOutputRange(minOutput, maxOutput);
+    }
+
     public RelativeEncoder getRelativeEncoder() {
         return sparkMax.getEncoder();
     }
