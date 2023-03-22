@@ -67,38 +67,38 @@ public class Lift extends SubsystemBase {
         elbowSpark = new CANSparkMax(LiftConstants.ELBOW_MOTOR_CAN_ID, MotorType.kBrushless);
         elbowPID = elbowSpark.getPIDController();
         TigerSparkMAX.init(
-                elbowSpark,
-                elbowPID,
-                LiftConstants.ELBOW_PID, 
-                0, 
-                LiftConstants.LIFT_MIN_OUTPUT, 
-                LiftConstants.LIFT_MAX_OUTPUT, 
-                IdleMode.kBrake, 
-                60);
+            elbowSpark,
+            elbowPID,
+            LiftConstants.ELBOW_PID, 
+            0, 
+            LiftConstants.LIFT_MIN_OUTPUT, 
+            LiftConstants.LIFT_MAX_OUTPUT, 
+            IdleMode.kBrake, 
+            60);
             
         shoulderFollowSpark = new CANSparkMax(LiftConstants.SHOULDER_FOLLOW_MOTOR_CAN_ID, MotorType.kBrushless);
         shoulderFollowPID = shoulderFollowSpark.getPIDController();
         TigerSparkMAX.init(
-                shoulderFollowSpark,
-                shoulderFollowPID,
-                LiftConstants.SHOULDER_PID, 
-                0, 
-                LiftConstants.LIFT_MIN_OUTPUT, 
-                LiftConstants.LIFT_MAX_OUTPUT, 
-                IdleMode.kBrake, 
-                60);
+            shoulderFollowSpark,
+            shoulderFollowPID,
+            LiftConstants.SHOULDER_PID, 
+            0, 
+            LiftConstants.LIFT_MIN_OUTPUT, 
+            LiftConstants.LIFT_MAX_OUTPUT, 
+            IdleMode.kBrake, 
+            60);
 
         elbowFollowSpark = new CANSparkMax(LiftConstants.ELBOW_FOLLOW_MOTOR_CAN_ID, MotorType.kBrushless);
         elbowFollowPID = elbowFollowSpark.getPIDController();
         TigerSparkMAX.init(
-                elbowFollowSpark,
-                elbowFollowPID,
-                LiftConstants.ELBOW_PID, 
-                0, 
-                LiftConstants.LIFT_MIN_OUTPUT, 
-                LiftConstants.LIFT_MAX_OUTPUT, 
-                IdleMode.kBrake, 
-                60);
+            elbowFollowSpark,
+            elbowFollowPID,
+            LiftConstants.ELBOW_PID, 
+            0, 
+            LiftConstants.LIFT_MIN_OUTPUT, 
+            LiftConstants.LIFT_MAX_OUTPUT, 
+            IdleMode.kBrake, 
+            60);
 
         shoulderEncoder = shoulderSpark.getEncoder();
         shoulderEncoder.setPositionConversionFactor(42);
