@@ -194,7 +194,6 @@ public class Lift extends SubsystemBase {
             (shoulderAngle + elbowAngle), 
             LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO, 
             42);
-
         shoulderPID.setReference(
             shoulderTargetPosition, 
             CANSparkMax.ControlType.kPosition);
@@ -305,7 +304,6 @@ public class Lift extends SubsystemBase {
             
         shoulderFollowEncoder.setPosition(shoulderTargetPosition);
         elbowFollowEncoder.setPosition(elbowTargetPosition);
-
         shoulderPID.setReference(shoulderTargetPosition, CANSparkMax.ControlType.kPosition);
         elbowPID.setReference(elbowTargetPosition, CANSparkMax.ControlType.kPosition);
         shoulderFollowPID.setReference(shoulderTargetPosition, CANSparkMax.ControlType.kPosition);

@@ -15,7 +15,6 @@ public class TigerSparkMAX {
 
     private double pidSetpoint;
 
-    
     public TigerSparkMAX(
         int canID, 
         MotorType motorType, 
