@@ -1,5 +1,6 @@
 package com.team2914.robot.subsystems;
 
+import com.team2914.lib.TigerController;
 import com.team2914.robot.Constants.OIConstants;
 import com.team2914.robot.commands.CommandBalanceRobot;
 
@@ -43,6 +44,11 @@ public class DriverController extends TigerController {
             .whileTrue(new RunCommand(() -> 
                 drivetrain.setFieldRelative(false)
             , drivetrain));
+
+        new JoystickButton(joystick, 8)
+            .whileTrue(new RunCommand(() -> drivetrain.align(0), drivetrain));
+        new JoystickButton(joystick, 9)
+            .whileTrue(new RunCommand(() -> drivetrain.align(180), drivetrain));
 
         // Hat controls 
         new POVButton(joystick, 90)

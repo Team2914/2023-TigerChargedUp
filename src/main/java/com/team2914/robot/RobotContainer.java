@@ -26,9 +26,6 @@ public class RobotContainer {
     private final Lift lift;
     private final Claw claw;
 
-    //private final Joystick driverController;
-    //private final Joystick operatorController;
-
     private final DriverController driverController;
     private final OperatorController operatorController;
 
@@ -39,7 +36,6 @@ public class RobotContainer {
         drivetrain = Drivetrain.getInstance();
         lift = Lift.getInstance();
         claw = Claw.getInstance();
-
         driverController = DriverController.getInstance();
         operatorController = OperatorController.getInstance();
 
@@ -53,8 +49,8 @@ public class RobotContainer {
 
         lift.setDefaultCommand(
             new RunCommand(() -> lift.moveArm(
-                MathUtil.applyDeadband(-operatorController.getY(), 0.06) * 0.05, 
-                MathUtil.applyDeadband(operatorController.getX(), 0.06) * 0.05),
+                MathUtil.applyDeadband(-operatorController.getY(), 0.06) * 0.15, 
+                MathUtil.applyDeadband(operatorController.getX(), 0.06) * 0.15),
                 lift)
         );
 

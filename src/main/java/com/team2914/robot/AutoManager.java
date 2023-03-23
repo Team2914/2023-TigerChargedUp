@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import com.team2914.robot.Constants.AutoConstants;
 import com.team2914.robot.Constants.DriveConstants;
+import com.team2914.robot.commands.IntakeGamePiece;
 
 /* AutoManager singleton. It manages autonomous opmodes. */
 public class AutoManager {
@@ -39,6 +40,8 @@ public class AutoManager {
     private HashMap<String, Command> eventMap;
     private SwerveAutoBuilderEx autoBuilder;
     private final SendableChooser<Command> autoChooser;
+    private final Claw claw = Claw.getInstance();
+    private final Lift lift = Lift.getInstance();
 
     private AutoManager() {
         eventMap = buildEventMap();
@@ -52,16 +55,15 @@ public class AutoManager {
             AutoConstants.PID_ROT_CONSTANTS,
             drivetrain::setModuleStates, 
             eventMap, 
-            true,
+            false,
             drivetrain);
 
         autoChooser = new SendableChooser<>();
         autoChooser.setDefaultOption("None", Commands.none());
         autoChooser.addOption("PIDTEST", PIDTEST());
+        autoChooser.addOption("Test auto", AutoNearSubstation());
         autoChooser.addOption("Backwards - 1 meter", Backwards1Meter());
         autoChooser.addOption("Backwards - 3.5 meter", Backwards3AndAHalfMeter());
-        autoChooser.addOption("Charge station balance (cry)", ChargeStationBalance());
-        autoChooser.addOption("Cube mid", CubeMid());
         
         SmartDashboard.putData("Autonomous OpMode", autoChooser);
     }
@@ -100,7 +102,7 @@ public class AutoManager {
 
     private CommandBase AutoNearSubstation() {
         return autoBuilder.fullAuto(
-            PathPlanner.loadPath("AutoNearSubstation", new PathConstraints(
+            PathPlanner.loadPathGroup("AutoNearSubstation", new PathConstraints(
                                                         AutoConstants.MAX_SPEED_METERS_PER_SECOND, 
                                                         AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED))
         );
@@ -151,25 +153,10 @@ public class AutoManager {
             Drivetrain.getInstance()::setModuleStates, 
             Drivetrain.getInstance());
     }
-
-    private CommandBase CubeMid() {
-        return new SequentialCommandGroup(
-            new RunCommand(() -> Lift.getInstance().setArmMid(), Lift.getInstance()),
-            new RunCommand(() -> Claw.getInstance().openClaw(), Claw.getInstance())
-        );
-    }
-
-    private CommandBase ChargeStationBalance() {
-        return new SequentialCommandGroup(
-            Backwards1Meter(),
-            new RunCommand(() -> Drivetrain.getInstance().autoBalance())
-        );
-    }
-
+    
     private HashMap<String, Command> buildEventMap() {
         return new HashMap<>(Map.ofEntries(
-            Map.entry("extendHigh", Commands.print("a")),
-            Map.entry("dropCone", Commands.print("b"))
+            Map.entry("runIntake", new IntakeGamePiece(claw, lift))
         ));
     }
 

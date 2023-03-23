@@ -1,6 +1,8 @@
 package com.team2914.robot.subsystems;
 
+import com.team2914.lib.TigerController;
 import com.team2914.robot.Constants.OIConstants;
+import com.team2914.robot.commands.IntakeGamePiece;
 import com.team2914.robot.utils.ClawState;
 
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -27,10 +29,13 @@ public class OperatorController extends TigerController {
         Claw claw = Claw.getInstance();
         Lift lift = Lift.getInstance();
 
+        IntakeGamePiece intakeCommand = new IntakeGamePiece(claw, lift);
+
         new JoystickButton(joystick, 1)
-            .whileTrue(new RunCommand(() -> claw.setIntakeSpeed(0.75), claw))
-            .whileFalse(new RunCommand(() -> claw.setIntakeSpeed(0), claw));
-            new JoystickButton(joystick, 2)
+            .whileTrue(intakeCommand)
+            .whileFalse(new RunCommand(() -> claw.stopIntake(), claw));
+
+        new JoystickButton(joystick, 2)
             .whileTrue(new RunCommand(() -> claw.setIntakeSpeed(-0.75), claw))
             .whileFalse(new RunCommand(() -> claw.setIntakeSpeed(0), claw));
         

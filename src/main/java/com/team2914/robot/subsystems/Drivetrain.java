@@ -9,6 +9,7 @@ import com.team2914.lib.gyro.BNO055;
 import com.team2914.lib.gyro.BNO055.opmode_t;
 import com.team2914.lib.gyro.BNO055.vector_type_t;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,6 +19,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -31,13 +33,6 @@ import org.photonvision.EstimatedRobotPose;
 import java.util.Optional;
 import java.util.List;
 import java.util.ArrayList;
-
-import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlanner;
-import com.pathplanner.lib.PathPoint;
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
-import edu.wpi.first.wpilibj2.command.CommandBase;
 
 public class Drivetrain extends SubsystemBase {
   private static Drivetrain instance = null;
@@ -62,7 +57,7 @@ public class Drivetrain extends SubsystemBase {
       DriveConstants.REAR_RIGHT_TURN_CAN_ID,
       DriveConstants.BACK_RIGHT_ANGULAR_OFFSET);
 
-  //private final AHRS gyro;
+  private final PIDController alignController;
   private final BNO055 gyro;
   private final Vision vision;
   private Field2d field = new Field2d();
@@ -87,6 +82,7 @@ public class Drivetrain extends SubsystemBase {
       },
       new Pose2d());
 
+    alignController = new PIDController(0.01, 0, 0);
     SmartDashboard.putData("Field", field);
     currentLocation = FieldLocation.OPEN;
   }
@@ -104,6 +100,7 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putBoolean("Gyro calibrated?", gyro.isCalibrated());
     SmartDashboard.putNumber("Heading", gyro.getRotation2d().getDegrees());
     SmartDashboard.putNumber("Pose X", poseEstimator.getEstimatedPosition().getX());
+    SmartDashboard.putNumber("target x", 2);
     SmartDashboard.putBoolean("Field relative", isFieldRelative);
     SmartDashboard.putString("Current location", currentLocation.name());
     SmartDashboard.putNumber("Robot pitch", gyro.getVector()[2]);
@@ -121,10 +118,19 @@ public class Drivetrain extends SubsystemBase {
 
     Optional<EstimatedRobotPose> camResult = vision.getEstimatedRobotPose(poseEstimator.getEstimatedPosition());
 
-    /*if (camResult.isPresent()) {
+    if (camResult.isPresent()) {
       EstimatedRobotPose camPose = camResult.get();
-      poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
-    }*/
+      double distance = 
+        new Translation2d(
+            camPose.estimatedPose.getTranslation().getX(), 
+            camPose.estimatedPose.getTranslation().getY())
+        .getDistance(poseEstimator.getEstimatedPosition().getTranslation());
+
+      poseEstimator.addVisionMeasurement(
+        camPose.estimatedPose.toPose2d(), 
+        camPose.timestampSeconds, 
+        VecBuilder.fill(distance / 2, distance / 2, 100));
+    }
     
     currentLocation = FieldLocation.OPEN;
     Translation2d translation = poseEstimator.getEstimatedPosition().getTranslation();
@@ -143,7 +149,6 @@ public class Drivetrain extends SubsystemBase {
     return poseEstimator.getEstimatedPosition();
   }
 
-
   public void drive(double xSpeed, double ySpeed, double rot) {
     // Adjust input based on max speed
     xSpeed *= DriveConstants.MAX_SPEED_METERS_PER_SECOND;
@@ -151,7 +156,7 @@ public class Drivetrain extends SubsystemBase {
     rot *= DriveConstants.MAX_ANGULAR_SPEED;
 
     var swerveModuleStates = DriveConstants.DRIVE_KINEMATICS.toSwerveModuleStates(isFieldRelative ? 
-      ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d()) :
+      ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().rotateBy(Rotation2d.fromDegrees(180))) :
       new ChassisSpeeds(xSpeed, ySpeed, rot)
     );
 
@@ -204,11 +209,6 @@ public class Drivetrain extends SubsystemBase {
     moduleRearRight.resetEncoders();
   }
 
-  /** Zeroes the heading of the robot. */
-  public void zeroHeading() {
-    //gyro.reset();
-  }
-
   public void resetPose(Pose2d pose) {
     poseEstimator.resetPosition(
       gyro.getRotation2d(), 
@@ -221,21 +221,26 @@ public class Drivetrain extends SubsystemBase {
       pose);
   }
 
+  public void align(double angle) {
+    alignController.setSetpoint(angle);
+
+    drive(
+      0, 
+      0, 
+      alignController.calculate(
+        poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 
+        alignController.getSetpoint()
+      )
+    );
+  }
+
+
   public void setFieldRelative(boolean fieldRelative) {
     this.isFieldRelative = fieldRelative;
   }
 
   public boolean isFieldRelative() {
     return isFieldRelative;
-  }
-
-  public void autoBalance() {
-    double pitch = gyro.getVector()[2];
-    boolean doBalance = (Math.abs(pitch) >= 10) ? true : false;
-    if (!doBalance) return;
-
-    System.out.println("Auto balancing...");
-    drive(Math.sin(Math.toRadians(pitch - (Math.signum(pitch)*10))) * -1, 0, 0);
   }
 
   public enum FieldLocation {

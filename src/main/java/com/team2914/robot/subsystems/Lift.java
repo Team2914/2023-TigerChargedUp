@@ -12,7 +12,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import com.team2914.lib.TigerSparkMAX;
 import com.team2914.robot.RobotContainer;
 import com.team2914.robot.Constants.LiftConstants;
 import com.team2914.robot.utils.ClawState;
@@ -20,21 +19,18 @@ import com.team2914.robot.utils.MathUtil;
 
 public class Lift extends SubsystemBase {
     private static Lift instance = null;
-    private final CANSparkMax shoulderSpark;
-    private final SparkMaxPIDController shoulderPID;
-    private final RelativeEncoder shoulderEncoder;
-
-    private final CANSparkMax elbowSpark;
-    private final SparkMaxPIDController elbowPID;
-    private final RelativeEncoder elbowEncoder;
-
-    private final CANSparkMax shoulderFollowSpark;
-    private final SparkMaxPIDController shoulderFollowPID;
-    private final RelativeEncoder shoulderFollowEncoder;
-
-    private final CANSparkMax elbowFollowSpark;
-    private final SparkMaxPIDController elbowFollowPID;
-    private final RelativeEncoder elbowFollowEncoder;
+    private final CANSparkMax shoulderMotor;
+    private final RelativeEncoder shoulderMotorEncoder;
+    private final SparkMaxPIDController shoulderMotorPID;
+    private final CANSparkMax elbowMotor;
+    private final RelativeEncoder elbowMotorEncoder;
+    private final SparkMaxPIDController elbowMotorPID;
+    private final CANSparkMax shoulderFollowMotor;
+    private final RelativeEncoder shoulderFollowMotorEncoder;
+    private final SparkMaxPIDController shoulderFollowMotorPID;
+    private final CANSparkMax elbowFollowMotor;
+    private final RelativeEncoder elbowFollowMotorEncoder;
+    private final SparkMaxPIDController elbowFollowMotorPID;
     
     private final double ARM_INIT_X = 11;
     private final double ARM_INIT_Y = 18;
@@ -52,76 +48,67 @@ public class Lift extends SubsystemBase {
     private boolean cubeMode;
 
     private Lift() {
-        shoulderSpark = new CANSparkMax(LiftConstants.SHOULDER_MOTOR_CAN_ID, MotorType.kBrushless);
-        shoulderPID = shoulderSpark.getPIDController();
-        TigerSparkMAX.init(
-            shoulderSpark,
-            shoulderPID,
-            LiftConstants.SHOULDER_PID, 
-            0, 
-            LiftConstants.LIFT_MIN_OUTPUT, 
-            LiftConstants.LIFT_MAX_OUTPUT, 
-            IdleMode.kBrake, 
-            60);
+        shoulderMotor = new CANSparkMax(LiftConstants.SHOULDER_MOTOR_CAN_ID, MotorType.kBrushless);
+        shoulderMotor.restoreFactoryDefaults();
+        elbowMotor = new CANSparkMax(LiftConstants.ELBOW_MOTOR_CAN_ID, MotorType.kBrushless);
+        elbowMotor.restoreFactoryDefaults();
+        shoulderFollowMotor = new CANSparkMax(LiftConstants.SHOULDER_FOLLOW_MOTOR_CAN_ID, MotorType.kBrushless);
+        shoulderFollowMotor.restoreFactoryDefaults();
+        elbowFollowMotor = new CANSparkMax(LiftConstants.ELBOW_FOLLOW_MOTOR_CAN_ID, MotorType.kBrushless);
+        elbowFollowMotor.restoreFactoryDefaults();
 
-        elbowSpark = new CANSparkMax(LiftConstants.ELBOW_MOTOR_CAN_ID, MotorType.kBrushless);
-        elbowPID = elbowSpark.getPIDController();
-        TigerSparkMAX.init(
-                elbowSpark,
-                elbowPID,
-                LiftConstants.ELBOW_PID, 
-                0, 
-                LiftConstants.LIFT_MIN_OUTPUT, 
-                LiftConstants.LIFT_MAX_OUTPUT, 
-                IdleMode.kBrake, 
-                60);
-            
-        shoulderFollowSpark = new CANSparkMax(LiftConstants.SHOULDER_FOLLOW_MOTOR_CAN_ID, MotorType.kBrushless);
-        shoulderFollowPID = shoulderFollowSpark.getPIDController();
-        TigerSparkMAX.init(
-                shoulderFollowSpark,
-                shoulderFollowPID,
-                LiftConstants.SHOULDER_PID, 
-                0, 
-                LiftConstants.LIFT_MIN_OUTPUT, 
-                LiftConstants.LIFT_MAX_OUTPUT, 
-                IdleMode.kBrake, 
-                60);
-
-        elbowFollowSpark = new CANSparkMax(LiftConstants.ELBOW_FOLLOW_MOTOR_CAN_ID, MotorType.kBrushless);
-        elbowFollowPID = elbowFollowSpark.getPIDController();
-        TigerSparkMAX.init(
-                elbowFollowSpark,
-                elbowFollowPID,
-                LiftConstants.ELBOW_PID, 
-                0, 
-                LiftConstants.LIFT_MIN_OUTPUT, 
-                LiftConstants.LIFT_MAX_OUTPUT, 
-                IdleMode.kBrake, 
-                60);
-
-        shoulderEncoder = shoulderSpark.getEncoder();
-        shoulderEncoder.setPositionConversionFactor(42);
-        shoulderPID.setFeedbackDevice(shoulderEncoder);
-
-        elbowEncoder = elbowSpark.getEncoder();
-        elbowEncoder.setPositionConversionFactor(42);
-        elbowPID.setFeedbackDevice(elbowEncoder);
-
-        shoulderFollowEncoder = shoulderFollowSpark.getEncoder();
-        shoulderFollowEncoder.setPositionConversionFactor(42);
-        shoulderFollowPID.setFeedbackDevice(shoulderFollowEncoder);
-
-        elbowFollowEncoder = elbowFollowSpark.getEncoder();
-        elbowFollowEncoder.setPositionConversionFactor(42);
-        elbowFollowPID.setFeedbackDevice(elbowFollowEncoder);
+        shoulderMotorEncoder = shoulderMotor.getEncoder();
+        shoulderMotorEncoder.setPositionConversionFactor(42);
+        shoulderMotorPID = shoulderMotor.getPIDController();
+        shoulderMotorPID.setFeedbackDevice(shoulderMotorEncoder);
+        shoulderMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        shoulderMotorPID.setI(LiftConstants.SHOULDER_PID.kI);
+        shoulderMotorPID.setD(LiftConstants.SHOULDER_PID.kD);
+        shoulderMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
+        shoulderMotor.setIdleMode(IdleMode.kBrake);
+        shoulderMotor.setSmartCurrentLimit(60);
         
-        shoulderSpark.setInverted(true);
-        elbowFollowSpark.setInverted(true);
+        elbowMotorEncoder = elbowMotor.getEncoder();
+        elbowMotorEncoder.setPositionConversionFactor(42);
+        elbowMotorPID = elbowMotor.getPIDController();
+        elbowMotorPID.setFeedbackDevice(elbowMotorEncoder);
+        elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        elbowMotorPID.setI(LiftConstants.ELBOW_PID.kI);
+        elbowMotorPID.setD(LiftConstants.ELBOW_PID.kD);
+        elbowMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
+        elbowMotor.setIdleMode(IdleMode.kBrake);
+        elbowMotor.setSmartCurrentLimit(60);
+
+        shoulderFollowMotorEncoder = shoulderFollowMotor.getEncoder();
+        shoulderFollowMotorEncoder.setPositionConversionFactor(42);
+        shoulderFollowMotorPID = shoulderFollowMotor.getPIDController();
+        shoulderFollowMotorPID.setFeedbackDevice(shoulderFollowMotorEncoder);
+        shoulderFollowMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        shoulderFollowMotorPID.setI(LiftConstants.SHOULDER_PID.kI);
+        shoulderFollowMotorPID.setD(LiftConstants.SHOULDER_PID.kD);
+        shoulderFollowMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
+        shoulderFollowMotor.setIdleMode(IdleMode.kBrake);
+        shoulderFollowMotor.setSmartCurrentLimit(60);
+
+        elbowFollowMotorEncoder = elbowFollowMotor.getEncoder();
+        elbowFollowMotorEncoder.setPositionConversionFactor(42);
+        elbowFollowMotorPID = elbowFollowMotor.getPIDController();
+        elbowFollowMotorPID.setFeedbackDevice(elbowFollowMotorEncoder);
+        elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        elbowFollowMotorPID.setI(LiftConstants.ELBOW_PID.kI);
+        elbowFollowMotorPID.setD(LiftConstants.ELBOW_PID.kD);
+        elbowFollowMotorPID.setOutputRange(LiftConstants.LIFT_MIN_OUTPUT, LiftConstants.LIFT_MAX_OUTPUT);
+        elbowFollowMotor.setIdleMode(IdleMode.kBrake);
+        elbowFollowMotor.setSmartCurrentLimit(60);
+        
+        shoulderMotor.setInverted(true);
+        elbowFollowMotor.setInverted(true);
 
         cubeMode = false;
 
         resetArm();
+        
+        //moveArm(2, 2);
     }
 
     public static Lift getInstance() {
@@ -132,24 +119,27 @@ public class Lift extends SubsystemBase {
         return instance;
     }
 
-    public void runLift(double val){
-        elbowSpark.set(val*0.1);
-        elbowFollowSpark.set(val*0.1);
-    }
-
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("/Arm/Shoulder joint encoder position", shoulderEncoder.getPosition());
-        SmartDashboard.putNumber("/Arm/Elbow joint encoder position", elbowEncoder.getPosition());
-        SmartDashboard.putNumber("/Arm/Shoulder joint follow encoder position", shoulderFollowEncoder.getPosition());
-        SmartDashboard.putNumber("/Arm/Elbow joint follow encoder position", elbowFollowEncoder.getPosition());
-        SmartDashboard.putNumber("/Arm/Shoulder angle", Math.toDegrees(shoulderAngle));
-        SmartDashboard.putNumber("/Arm/Elbow angle", Math.toDegrees(shoulderAngle + elbowAngle));
-        SmartDashboard.putNumber("/Arm/Arm X", armX);
-        SmartDashboard.putNumber("/Arm/Arm Y", armY);
-        SmartDashboard.putNumber("/Arm/Elbow target position", elbowTargetPosition);
-        SmartDashboard.putNumber("/Arm/Shoulder target position", shoulderTargetPosition);
-        SmartDashboard.putNumber("/Arm/Elbow Output", elbowSpark.getAppliedOutput());
+        SmartDashboard.putNumber("Shoulder joint encoder position", shoulderMotorEncoder.getPosition());
+        SmartDashboard.putNumber("Elbow joint encoder position", elbowMotorEncoder.getPosition());
+        SmartDashboard.putNumber("Shoulder joint follow encoder position", shoulderFollowMotorEncoder.getPosition());
+        SmartDashboard.putNumber("Elbow joint follow encoder position", elbowFollowMotorEncoder.getPosition());
+        SmartDashboard.putNumber("Shoulder angle", Math.toDegrees(shoulderAngle));
+        SmartDashboard.putNumber("Elbow angle", Math.toDegrees(shoulderAngle + elbowAngle));
+        SmartDashboard.putNumber("Arm X", armX);
+        SmartDashboard.putNumber("Arm Y", armY);
+        SmartDashboard.putNumber("Elbow Target", elbowTargetPosition);
+        SmartDashboard.putNumber("Elbow Applied Output", elbowMotor.getAppliedOutput());
+        SmartDashboard.putNumber("ELbow Current", elbowMotor.getOutputCurrent());
+        SmartDashboard.putNumber("Elbow Follower Applied Output", elbowFollowMotor.getAppliedOutput());
+        SmartDashboard.putNumber("ELbow Follower Current", elbowFollowMotor.getOutputCurrent());
+        SmartDashboard.putNumber("Elbow Temp", elbowFollowMotor.getMotorTemperature());
+
+        SmartDashboard.putNumber("Shoulder target", shoulderTargetPosition);
+        SmartDashboard.putNumber("Shoulder Current", shoulderMotor.getOutputCurrent());
+        SmartDashboard.putNumber("Shoulder Follower Current", shoulderFollowMotor.getOutputCurrent());
+        SmartDashboard.putNumber("Operator controller slider", OperatorController.getInstance().getSlider());
 
         if (OperatorController.getInstance().getSlider() > 0) {
             cubeMode = true;
@@ -159,6 +149,9 @@ public class Lift extends SubsystemBase {
     }
 
     public void moveArm(double dx, double dy) {
+        /*double travelA = Math.toRadians(80);
+        double dx = Math.cos(travelA)*dH;
+        double dy = Math.sin(travelA)*dH;*/
         armX += dx;
         armY += dy;
         if (armX < ARM_INIT_X) {
@@ -195,26 +188,26 @@ public class Lift extends SubsystemBase {
             LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO, 
             42);
 
-        shoulderPID.setReference(
+        shoulderMotorPID.setReference(
             shoulderTargetPosition, 
             CANSparkMax.ControlType.kPosition);
-        shoulderFollowPID.setReference(
+        shoulderFollowMotorPID.setReference(
             shoulderTargetPosition, 
             CANSparkMax.ControlType.kPosition);
 
-        elbowPID.setReference(
+        elbowMotorPID.setReference(
             elbowTargetPosition, 
             CANSparkMax.ControlType.kPosition);
-        elbowFollowPID.setReference(
+        elbowFollowMotorPID.setReference(
             elbowTargetPosition, 
             CANSparkMax.ControlType.kPosition);
     }
 
     public void setArmHigh() {
-        shoulderPID.setP(LiftConstants.SHOULDER_PID.kP);
-        shoulderFollowPID.setP(LiftConstants.SHOULDER_PID.kP);
-        elbowPID.setP(LiftConstants.ELBOW_PID.kP);
-        elbowFollowPID.setP(LiftConstants.ELBOW_PID.kP);
+        shoulderMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        shoulderFollowMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
         // elbowSpark.setI(LiftConstants.ELBOW_PID.kI);
         // elbowFollowSpark.setI(LiftConstants.ELBOW_PID.kI);
 
@@ -222,8 +215,8 @@ public class Lift extends SubsystemBase {
             armX = 100;
             armY = 180;
         } else {
-            armX = 110;
-            armY = 210;
+            armX = 100;
+            armY = 230;
         }
 
         ClawState.liftLevel = 3;
@@ -231,10 +224,10 @@ public class Lift extends SubsystemBase {
     }
 
     public void setArmMid() {
-        shoulderPID.setP(LiftConstants.SHOULDER_PID.kP);
-        shoulderFollowPID.setP(LiftConstants.SHOULDER_PID.kP);
-        elbowPID.setP(LiftConstants.ELBOW_PID.kP);
-        elbowFollowPID.setP(LiftConstants.ELBOW_PID.kP);
+        shoulderMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        shoulderFollowMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
         // elbowSpark.setI(LiftConstants.ELBOW_PID.kI);
         // elbowFollowSpark.setI(LiftConstants.ELBOW_PID.kI);
 
@@ -242,18 +235,18 @@ public class Lift extends SubsystemBase {
             armX = 80;
             armY = 110;
         } else {
-            armX = 80;
-            armY = 210;
+            armX = 90;
+            armY = 205;
         }
 
         ClawState.liftLevel = 2;
     }
 
     public void liftGamePiece() {
-        shoulderPID.setP(LiftConstants.SHOULDER_PID.kP);
-        shoulderFollowPID.setP(LiftConstants.SHOULDER_PID.kP);
-        elbowPID.setP(LiftConstants.ELBOW_PID.kP);
-        elbowFollowPID.setP(LiftConstants.ELBOW_PID.kP);
+        shoulderMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        shoulderFollowMotorPID.setP(LiftConstants.SHOULDER_PID.kP);
+        elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
+        elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP);
         // elbowSpark.setI(LiftConstants.ELBOW_PID.kI);
         // elbowFollowSpark.setI(LiftConstants.ELBOW_PID.kI);
 
@@ -264,11 +257,10 @@ public class Lift extends SubsystemBase {
     }
 
     public void setArmLow() {
-        shoulderPID.setP(LiftConstants.SHOULDER_PID.kP * 0.5);
-        shoulderFollowPID.setP(LiftConstants.SHOULDER_PID.kP * 0.5);
-        elbowPID.setP(LiftConstants.ELBOW_PID.kP * 0.01);
-        
-        elbowFollowPID.setP(LiftConstants.ELBOW_PID.kP * 0.01);
+        shoulderMotorPID.setP(LiftConstants.SHOULDER_PID.kP*0.5);
+        shoulderFollowMotorPID.setP(LiftConstants.SHOULDER_PID.kP*0.5);
+        elbowMotorPID.setP(LiftConstants.ELBOW_PID.kP*0.01);
+        elbowFollowMotorPID.setP(LiftConstants.ELBOW_PID.kP*0.01);
         // elbowSpark.setI(0);
         // elbowFollowSpark.setI(0); 
 
@@ -300,29 +292,29 @@ public class Lift extends SubsystemBase {
             LiftConstants.ELBOW_GEAR_RATIO * LiftConstants.ELBOW_SPROCKET_RATIO,
             42);
 
-        shoulderEncoder.setPosition(shoulderTargetPosition);
-        elbowEncoder.setPosition(elbowTargetPosition);
+        shoulderMotorEncoder.setPosition(shoulderTargetPosition);
+        elbowMotorEncoder.setPosition(elbowTargetPosition);
             
-        shoulderFollowEncoder.setPosition(shoulderTargetPosition);
-        elbowFollowEncoder.setPosition(elbowTargetPosition);
+        shoulderFollowMotorEncoder.setPosition(shoulderTargetPosition);
+        elbowFollowMotorEncoder.setPosition(elbowTargetPosition);
 
-        shoulderPID.setReference(shoulderTargetPosition, CANSparkMax.ControlType.kPosition);
-        elbowPID.setReference(elbowTargetPosition, CANSparkMax.ControlType.kPosition);
-        shoulderFollowPID.setReference(shoulderTargetPosition, CANSparkMax.ControlType.kPosition);
-        elbowFollowPID.setReference(elbowTargetPosition, CANSparkMax.ControlType.kPosition);
+        shoulderMotorPID.setReference(shoulderTargetPosition, CANSparkMax.ControlType.kPosition);
+        elbowMotorPID.setReference(elbowTargetPosition, CANSparkMax.ControlType.kPosition);
+        shoulderFollowMotorPID.setReference(shoulderTargetPosition, CANSparkMax.ControlType.kPosition);
+        elbowFollowMotorPID.setReference(elbowTargetPosition, CANSparkMax.ControlType.kPosition);
     }
 
     public void setCoast() {
-        shoulderSpark.setIdleMode(IdleMode.kCoast);
-        shoulderFollowSpark.setIdleMode(IdleMode.kCoast);
-        elbowSpark.setIdleMode(IdleMode.kCoast);
-        elbowFollowSpark.setIdleMode(IdleMode.kCoast);
+        shoulderMotor.setIdleMode(IdleMode.kCoast);
+        shoulderFollowMotor.setIdleMode(IdleMode.kCoast);
+        elbowMotor.setIdleMode(IdleMode.kCoast);
+        elbowFollowMotor.setIdleMode(IdleMode.kCoast);
     }
 
     public void setBrake() {
-        shoulderSpark.setIdleMode(IdleMode.kBrake);
-        shoulderFollowSpark.setIdleMode(IdleMode.kBrake);
-        elbowSpark.setIdleMode(IdleMode.kBrake);
-        elbowFollowSpark.setIdleMode(IdleMode.kBrake);
+        shoulderMotor.setIdleMode(IdleMode.kBrake);
+        shoulderFollowMotor.setIdleMode(IdleMode.kBrake);
+        elbowMotor.setIdleMode(IdleMode.kBrake);
+        elbowFollowMotor.setIdleMode(IdleMode.kBrake);
     }
 }
