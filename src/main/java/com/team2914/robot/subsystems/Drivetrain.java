@@ -118,31 +118,20 @@ public class Drivetrain extends SubsystemBase {
 
     Optional<EstimatedRobotPose> camResult = vision.getEstimatedRobotPose(poseEstimator.getEstimatedPosition());
 
-    if (camResult.isPresent()) {
+    /*if (camResult.isPresent()) {
       EstimatedRobotPose camPose = camResult.get();
-      double distance = 
-        new Translation2d(
-            camPose.estimatedPose.getTranslation().getX(), 
-            camPose.estimatedPose.getTranslation().getY())
-        .getDistance(poseEstimator.getEstimatedPosition().getTranslation());
+      double dx = camPose.estimatedPose.getTranslation().getX() - poseEstimator.getEstimatedPosition().getTranslation().getX();
+      double dy = camPose.estimatedPose.getTranslation().getY() - poseEstimator.getEstimatedPosition().getTranslation().getY();
+
+      double distance = Math.sqrt(dx*dx + dy*dy);
 
       poseEstimator.addVisionMeasurement(
         camPose.estimatedPose.toPose2d(), 
         camPose.timestampSeconds, 
         VecBuilder.fill(distance / 2, distance / 2, 100));
-    }
+    }*/
     
     currentLocation = FieldLocation.OPEN;
-    Translation2d translation = poseEstimator.getEstimatedPosition().getTranslation();
-    if (MiscUtil.isInsideBoundingBox(translation, AutoConstants.BLU_GRID1_BB_TOP_LEFT, AutoConstants.BLU_GRID1_BB_BTM_RITE)) {
-      currentLocation = FieldLocation.BLU_GRID_1;
-    }
-    if (MiscUtil.isInsideBoundingBox(translation, AutoConstants.BLU_GRID2_BB_TOP_LEFT, AutoConstants.BLU_GRID2_BB_BTM_RITE)) {
-      currentLocation = FieldLocation.BLU_GRID_2;
-    }
-    if (MiscUtil.isInsideBoundingBox(translation, AutoConstants.BLU_GRID3_BB_TOP_LEFT, AutoConstants.BLU_GRID3_BB_BTM_RITE)) {
-      currentLocation = FieldLocation.BLU_GRID_3;
-    }
   }
 
   public Pose2d getPose() {

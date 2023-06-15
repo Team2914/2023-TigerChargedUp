@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import com.team2914.robot.Constants.AutoConstants;
 import com.team2914.robot.Constants.DriveConstants;
+import com.team2914.robot.commands.CommandMoveLift;
 import com.team2914.robot.commands.IntakeGamePiece;
 
 /* AutoManager singleton. It manages autonomous opmodes. */
@@ -61,8 +62,10 @@ public class AutoManager {
         autoChooser = new SendableChooser<>();
         autoChooser.setDefaultOption("None", Commands.none());
         autoChooser.addOption("PIDTEST", PIDTEST());
-        autoChooser.addOption("Test auto", AutoNearSubstation());
-        autoChooser.addOption("Backwards - 1 meter", Backwards1Meter());
+        autoChooser.addOption("mid cube yolo", AutoPlaceCube());
+        autoChooser.addOption("Red charge station", RedCharge());
+        autoChooser.addOption("Blue charge station", BlueCharge());
+        autoChooser.addOption("Backwards - 1 meter", Backwards1Meter().withTimeout(1));
         autoChooser.addOption("Backwards - 3.5 meter", Backwards3AndAHalfMeter());
         
         SmartDashboard.putData("Autonomous OpMode", autoChooser);
@@ -75,6 +78,15 @@ public class AutoManager {
 
         return instance;
     }
+
+    private CommandBase AutoPlaceCube() {
+        return new SequentialCommandGroup(
+            new RunCommand(() -> claw.runIntake(), claw).withTimeout(0.2),
+            new RunCommand(() -> claw.closeClaw(), claw).withTimeout(0.5),
+            new RunCommand(() -> lift.setArmMid(), claw).withTimeout(3),
+            new RunCommand(() -> claw.runOuttake(), claw).withTimeout(0.5)
+        );
+    }
     
     private CommandBase PIDTEST() {
         return autoBuilder.fullAuto(
@@ -84,25 +96,17 @@ public class AutoManager {
         );
     }
 
-    private CommandBase AutoFarSide() {
+    private CommandBase RedCharge() {
         return autoBuilder.fullAuto(
-            PathPlanner.loadPath("AutoFarSide", new PathConstraints(
+            PathPlanner.loadPath("RedCharge", new PathConstraints(
                                                         AutoConstants.MAX_SPEED_METERS_PER_SECOND, 
                                                         AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED))
         );
     }
 
-    private CommandBase AutoMid() {
+    private CommandBase BlueCharge() {
         return autoBuilder.fullAuto(
-            PathPlanner.loadPath("AutoMid", new PathConstraints(
-                                                        AutoConstants.MAX_SPEED_METERS_PER_SECOND, 
-                                                        AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED))
-        );
-    }
-
-    private CommandBase AutoNearSubstation() {
-        return autoBuilder.fullAuto(
-            PathPlanner.loadPathGroup("AutoNearSubstation", new PathConstraints(
+            PathPlanner.loadPath("BlueCharge", new PathConstraints(
                                                         AutoConstants.MAX_SPEED_METERS_PER_SECOND, 
                                                         AutoConstants.MAX_ACCEL_METERS_PER_SEC_SQUARED))
         );
@@ -112,7 +116,7 @@ public class AutoManager {
         Pose2d currentPose = Drivetrain.getInstance().getPose();
         List<PathPoint> points = new ArrayList<PathPoint>();
         points.add(new PathPoint(currentPose.getTranslation(), currentPose.getRotation(), currentPose.getRotation()));
-        points.add(new PathPoint(new Translation2d(currentPose.getX() - 1.635, currentPose.getY()), currentPose.getRotation(), currentPose.getRotation()));
+        points.add(new PathPoint(new Translation2d(currentPose.getX() - 1.62, currentPose.getY()), currentPose.getRotation(), currentPose.getRotation()));
 
         PathPlannerTrajectory traj = PathPlanner.generatePath(
             new PathConstraints(

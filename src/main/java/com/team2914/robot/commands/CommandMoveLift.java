@@ -5,23 +5,23 @@ import com.team2914.robot.subsystems.Lift;
 
 public class CommandMoveLift extends CommandBase {
     private final Lift lift;
-    private double pos;
+    private final int level;
 
-    public CommandMoveLift(double pos, Lift lift) {
+    public CommandMoveLift(Lift lift, int level) {
         this.lift = lift;
-        this.pos = pos;
+        this.level = level;
 
         addRequirements(lift);
     }
 
-    @Override
-    public void initialize() {
-
-    }
-
-    @Override
+    @Override 
     public void execute() {
-        //lift.setMotorPosition(pos);
+        lift.setArmMid();
     }
 
+    @Override
+    public boolean isFinished() {
+        //return lift.atSetpoint();
+        return false;
+    }
 }

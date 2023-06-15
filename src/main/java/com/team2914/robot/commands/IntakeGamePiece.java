@@ -12,7 +12,7 @@ import com.team2914.robot.utils.ClawState;
 public class IntakeGamePiece extends CommandBase {
   private final Claw claw;
   private final Lift lift;
-  /** Creates a new IntakeGamePiece. */
+
   public IntakeGamePiece(Claw claw, Lift lift) {
     this.claw = claw;
     this.lift = lift;
@@ -20,17 +20,14 @@ public class IntakeGamePiece extends CommandBase {
     addRequirements(claw, lift);
   }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     ClawState.hasGamePiece = false;
     //claw.openClaw();
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    //System.out.println(ClawState.liftLevel);
     if (!ClawState.hasGamePiece && !ClawState.closed) {
       claw.runIntake();
     } else if (ClawState.hasGamePiece && !ClawState.closed) {
@@ -44,13 +41,6 @@ public class IntakeGamePiece extends CommandBase {
     }
   }
 
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {
-    
-  }
-
-  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     return ClawState.liftLevel > 0;

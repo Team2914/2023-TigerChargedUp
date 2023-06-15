@@ -40,9 +40,9 @@ public class Claw extends SubsystemBase {
 
         rotateMotor = new CANSparkMax(ClawConstants.ROTATE_CAN_ID, MotorType.kBrushed);
         rotateMotor.setIdleMode(IdleMode.kBrake);
-        rotateMotor.setSmartCurrentLimit(15);
+        rotateMotor.setSmartCurrentLimit(20);
 
-        colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
+        colorSensor = new ColorSensorV3(I2C.Port.kMXP);
         colorMatcher = new ColorMatch();
         colorMatcher.addColorMatch(VisionConstants.CONE_COLOR);
         colorMatcher.addColorMatch(VisionConstants.CUBE_COLOR);
@@ -96,7 +96,7 @@ public class Claw extends SubsystemBase {
     }
 
     public void closeClaw() {
-        set(-0.25);
+        set(-0.3);
     }
 
     public void set(double val) {

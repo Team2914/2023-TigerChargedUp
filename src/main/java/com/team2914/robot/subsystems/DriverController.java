@@ -45,6 +45,20 @@ public class DriverController extends TigerController {
                 drivetrain.setFieldRelative(false)
             , drivetrain));
 
+        new JoystickButton(joystick, 3)
+            .whileTrue(new RunCommand(() -> drivetrain.drive(
+                0, 
+                0, 
+                -0.04), 
+                drivetrain));
+
+        new JoystickButton(joystick,4)
+            .whileTrue(new RunCommand(() -> drivetrain.drive(
+                0, 
+                0, 
+                0.04), 
+                drivetrain));
+
         new JoystickButton(joystick, 8)
             .whileTrue(new RunCommand(() -> drivetrain.align(0), drivetrain));
         new JoystickButton(joystick, 9)
